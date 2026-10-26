@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我们的宇宙 · 整个宇宙都为你展开</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z' fill='%23f3a3bd'/%3E%3Ccircle cx='16' cy='4' r='1.6' fill='%23f7d392'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://miaoda.feishu.cn">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=ZCOOL+XiaoWei&amp;family=Noto+Serif+SC:wght@400;500;600;700&amp;display=swap">
+<script src="https://fastly.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+<style>
+/* ============================================================
+   我们的宇宙 · 全局变量与重置
+   ============================================================ */
+:root{
+  --bg:#05081a;
+  --bg-2:#0a0f2b;
+  --ink:#f1eefd;
+  --dim:#a9a4cf;
+  --faint:#7d78a6;
+  --rose:#f3a3bd;
+  --rose-soft:#ffd7e1;
+  --gold:#f7d392;
+  --violet:#8f80e8;
+  --violet-soft:#b7acf5;
+  --card:rgba(18,23,52,.62);
+  --card-deep:rgba(12,16,40,.82);
+  --line:rgba(255,255,255,.10);
+  --line-strong:rgba(255,255,255,.2);
+  --shadow:0 24px 60px rgba(0,0,0,.45);
+  --radius:22px;
+  --title-font:"ZCOOL XiaoWei","Noto Serif SC",serif;
+  --body-font:"Noto Serif SC","Songti SC","STSong",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--body-font);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.75;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%;}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--rose);outline-offset:3px;border-radius:6px;}
+
+/* ============================================================
+   星空背景层
+   ============================================================ */
+#space{
+  position:fixed;inset:0;width:100%;height:100%;
+  z-index:0;pointer-events:none;
+}
+.nebula{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.nebula span{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;}
+.nebula .n1{width:60vmax;height:60vmax;left:-20vmax;top:-25vmax;
+  background:radial-gradient(circle,rgba(78,62,160,.5),transparent 65%);}
+.nebula .n2{width:52vmax;height:52vmax;right:-22vmax;top:8vmax;
+  background:radial-gradient(circle,rgba(130,48,104,.38),transparent 65%);}
+.nebula .n3{width:56vmax;height:56vmax;left:-10vmax;bottom:-30vmax;
+  background:radial-gradient(circle,rgba(36,52,130,.55),transparent 65%);}
+.nebula .n4{width:40vmax;height:40vmax;right:-8vmax;bottom:-18vmax;
+  background:radial-gradient(circle,rgba(122,84,180,.32),transparent 65%);}
+/* 顶部滚动进度条 */
+#progress{
+  position:fixed;top:0;left:0;height:2px;width:0;
+  background:linear-gradient(90deg,var(--violet),var(--rose),var(--gold));
+  z-index:60;
+}
+
+/* ============================================================
+   顶栏
+   ============================================================ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;
+  transition:background .3s ease,border-color .3s ease;
+  border-bottom:1px solid transparent;
+}
+.topbar.scrolled{
+  background:rgba(6,10,28,.72);
+  border-bottom-color:var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--title-font);
+  font-size:19px;letter-spacing:.14em;color:var(--ink);}
+.brand svg{width:26px;height:26px;}
+.brand small{display:block;font-family:var(--body-font);font-size:10px;letter-spacing:.3em;
+  color:var(--faint);line-height:1;}
+.top-actions{display:flex;gap:10px;}
+.icon-btn{
+  width:42px;height:42px;border-radius:50%;
+  display:grid;place-items:center;
+  border:1px solid var(--line);
+  background:rgba(18,23,52,.4);
+  transition:border-color .25s,background .25s,transform .25s;
+}
+.icon-btn:hover{border-color:var(--rose);background:rgba(40,30,70,.6);transform:translateY(-2px);}
+.icon-btn svg{width:19px;height:19px;stroke:var(--ink);fill:none;stroke-width:1.7;}
+.icon-btn.is-muted svg{stroke:var(--faint);}
+
+/* ============================================================
+   通用区块
+   ============================================================ */
+main{position:relative;z-index:10;}
+section{padding:96px 22px;max-width:1080px;margin:0 auto;}
+.sec-head{text-align:center;margin-bottom:46px;}
+.sec-kicker{
+  font-family:var(--title-font);font-size:15px;letter-spacing:.4em;
+  color:var(--rose);margin-bottom:14px;
+}
+.sec-kicker::before,.sec-kicker::after{content:"·";margin:0 14px;color:var(--gold);}
+.sec-head h2{
+  font-family:var(--title-font);
+  font-size:clamp(30px,6vw,44px);
+  font-weight:400;letter-spacing:.06em;line-height:1.3;
+}
+.sec-sub{color:var(--dim);font-size:15px;margin-top:12px;}
+
+/* 入场动画 */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s ease,transform .9s ease;}
+.reveal.in{opacity:1;transform:none;}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+#hero{
+  position:relative;
+  min-height:100svh;
+  max-width:860px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding-top:110px;padding-bottom:70px;
+}
+.hero-eyebrow{
+  font-size:14px;letter-spacing:.34em;color:var(--gold);
+  text-indent:.34em;margin-bottom:30px;
+}
+.hero-title{
+  font-family:var(--title-font);font-weight:400;
+  font-size:clamp(44px,11vw,92px);
+  line-height:1.22;letter-spacing:.08em;
+  text-shadow:0 0 46px rgba(143,128,232,.45);
+}
+.hero-title .accent{
+  background:linear-gradient(120deg,var(--rose-soft),var(--gold) 55%,var(--violet-soft));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-names{
+  display:flex;align-items:center;gap:18px;justify-content:center;
+  margin-top:36px;font-family:var(--title-font);font-size:clamp(22px,5vw,32px);
+  letter-spacing:.12em;
+}
+.hero-names .heart svg{width:26px;height:26px;fill:var(--rose);
+  filter:drop-shadow(0 0 10px rgba(243,163,189,.8));
+  animation:beat 1.6s ease-in-out infinite;}
+@keyframes beat{0%,100%{transform:scale(1);}14%{transform:scale(1.22);}28%{transform:scale(1);}42%{transform:scale(1.14);}}
+.hero-since{margin-top:18px;color:var(--dim);font-size:15px;letter-spacing:.08em;}
+.hero-since b{color:var(--gold);font-weight:600;}
+.hero-days{
+  margin-top:34px;display:inline-flex;align-items:baseline;gap:10px;
+  padding:12px 28px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(18,23,52,.5);
+}
+.hero-days b{font-size:26px;color:var(--rose-soft);font-weight:600;
+  font-variant-numeric:tabular-nums;}
+.hero-days span{font-size:14px;color:var(--dim);}
+.hero-scroll{
+  position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:var(--faint);font-size:12px;letter-spacing:.3em;text-indent:.3em;
+}
+.hero-scroll svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.5;
+  animation:floaty 2s ease-in-out infinite;}
+@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+
+/* ============================================================
+   恋爱倒计时
+   ============================================================ */
+.clock-card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:46px 28px;text-align:center;
+  box-shadow:var(--shadow);
+  position:relative;overflow:hidden;
+}
+.clock-card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(600px 220px at 50% -120px,rgba(243,163,189,.16),transparent 70%);
+}
+.clock-line{color:var(--dim);letter-spacing:.2em;font-size:15px;margin-bottom:26px;}
+.clock-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  max-width:620px;margin:0 auto;
+}
+.clock-cell{
+  background:rgba(9,12,32,.6);border:1px solid var(--line);
+  border-radius:16px;padding:16px 6px 13px;
+}
+.clock-cell b{
+  display:block;font-size:clamp(28px,7vw,46px);font-weight:600;
+  color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.1;
+}
+.clock-cell:first-child b{color:var(--rose-soft);}
+.clock-cell span{display:block;font-size:12px;color:var(--dim);margin-top:6px;letter-spacing:.2em;}
+.clock-extra{margin-top:24px;color:var(--dim);font-size:14px;}
+.clock-extra b{color:var(--violet-soft);font-weight:600;}
+.next-mile{
+  margin:28px auto 0;max-width:620px;
+  border-top:1px dashed var(--line);padding-top:26px;
+}
+.next-mile .nm-top{display:flex;justify-content:space-between;align-items:baseline;
+  gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.next-mile .nm-label{font-size:15px;letter-spacing:.08em;}
+.next-mile .nm-label b{color:var(--gold);font-weight:600;}
+.next-mile .nm-days{font-size:14px;color:var(--dim);}
+.next-mile .nm-days b{color:var(--rose-soft);font-size:22px;font-weight:600;
+  font-variant-numeric:tabular-nums;margin:0 2px;}
+.nm-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;}
+.nm-bar i{display:block;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--violet),var(--rose),var(--gold));
+  width:0;transition:width 1.2s cubic-bezier(.22,1,.36,1);}
+
+.milestones{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:22px;
+}
+.mile{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:15px 18px;
+}
+.mile .dot{
+  width:34px;height:34px;flex:none;border-radius:50%;
+  display:grid;place-items:center;
+  border:1px solid var(--line-strong);background:rgba(255,255,255,.04);
+}
+.mile .dot svg{width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2;}
+.mile .m-name{font-size:15px;letter-spacing:.05em;}
+.mile .m-date{font-size:12px;color:var(--faint);}
+.mile.done{border-color:rgba(247,211,146,.4);
+  background:linear-gradient(135deg,rgba(247,211,146,.1),rgba(243,163,189,.06));}
+.mile.done .dot{border-color:var(--gold);background:rgba(247,211,146,.16);}
+.mile.done .dot svg{stroke:var(--gold);}
+.mile.next{border-color:rgba(243,163,189,.55);
+  background:linear-gradient(135deg,rgba(243,163,189,.13),rgba(143,128,232,.08));
+  animation:glow 2.6s ease-in-out infinite;}
+.mile.next .dot{border-color:var(--rose);background:rgba(243,163,189,.16);}
+.mile.next .dot svg{stroke:var(--rose);}
+.mile.next .m-date{color:var(--rose-soft);}
+@keyframes glow{0%,100%{box-shadow:0 0 0 rgba(243,163,189,0);}
+  50%{box-shadow:0 0 26px rgba(243,163,189,.25);}}
+
+/* ============================================================
+   她的宇宙说明书 · 特征墙
+   ============================================================ */
+.traits-grid{
+  display:grid;grid-template-columns:1fr;gap:14px;
+}
+.trait{
+  position:relative;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:26px 22px 24px;
+  transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s,box-shadow .3s;
+}
+.trait:hover{
+  transform:translateY(-4px);
+  border-color:rgba(243,163,189,.4);
+  box-shadow:0 18px 44px rgba(0,0,0,.4),0 0 26px rgba(243,163,189,.1);
+}
+.trait .t-icon{
+  width:46px;height:46px;border-radius:50%;
+  display:grid;place-items:center;margin-bottom:16px;
+  background:radial-gradient(circle at 35% 30%,rgba(255,215,225,.9),rgba(143,128,232,.55));
+  box-shadow:0 0 22px rgba(143,128,232,.35);
+}
+.trait .t-icon svg{width:22px;height:22px;fill:#2b1840;}
+.trait h3{
+  font-family:var(--title-font);font-weight:400;font-size:20px;
+  letter-spacing:.06em;margin-bottom:8px;color:var(--gold);
+}
+.trait p{font-size:14.5px;color:var(--dim);line-height:1.85;}
+.trait .t-ops{
+  position:absolute;top:12px;right:12px;display:flex;gap:8px;
+  opacity:0;transition:opacity .25s;
+}
+.trait:hover .t-ops{opacity:1;}
+.trait .t-ops button{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(8,10,28,.7);border:1px solid var(--line-strong);
+  display:grid;place-items:center;
+}
+.trait .t-ops button:hover{background:rgba(243,163,189,.18);}
+.trait .t-ops svg{width:13px;height:13px;stroke:var(--rose-soft);fill:none;stroke-width:2;}
+.trait.editing{border-color:var(--rose);background:var(--card-deep);}
+.trait.editing .t-ops{opacity:1;}
+.trait .t-input,.trait .t-textarea{
+  width:100%;font-family:inherit;color:var(--ink);
+  background:rgba(8,11,30,.8);border:1px solid var(--line-strong);
+  border-radius:10px;padding:9px 12px;font-size:15px;margin-bottom:10px;
+}
+.trait .t-textarea{min-height:92px;resize:vertical;line-height:1.8;}
+.trait .t-input:focus,.trait .t-textarea:focus{border-color:var(--rose);outline:none;}
+.trait .t-save{
+  font-size:13px;padding:8px 18px;border-radius:999px;
+  border:1px solid var(--rose);color:var(--rose-soft);
+}
+.trait .t-save:hover{background:rgba(243,163,189,.14);}
+.traits-actions{display:flex;gap:14px;justify-content:center;margin-top:30px;flex-wrap:wrap;}
+
+/* ============================================================
+   照片墙
+   ============================================================ */
+.gallery-bar{display:flex;align-items:center;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;margin-bottom:28px;}
+.gallery-tip{font-size:13px;color:var(--faint);}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 24px;border-radius:999px;font-size:15px;letter-spacing:.08em;
+  border:1px solid var(--rose);
+  color:var(--rose-soft);
+  transition:background .25s,box-shadow .25s,transform .2s,color .25s;
+}
+.btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;}
+.btn:hover{background:rgba(243,163,189,.14);transform:translateY(-2px);
+  box-shadow:0 10px 30px rgba(243,163,189,.22);}
+.btn.solid{background:linear-gradient(120deg,#e889a6,#d98abf);color:#2b1530;border-color:transparent;}
+.btn.solid:hover{background:linear-gradient(120deg,#f098b4,#e195cb);}
+.btn.ghost{border-color:var(--line-strong);color:var(--ink);}
+.btn.ghost:hover{background:rgba(255,255,255,.08);}
+
+.gallery-grid{column-count:2;column-gap:14px;}
+.photo{
+  position:relative;break-inside:avoid;margin-bottom:14px;
+  border-radius:16px;overflow:hidden;border:1px solid var(--line);
+  cursor:pointer;background:var(--card-deep);
+}
+.photo img{width:100%;transition:transform .6s cubic-bezier(.22,1,.36,1);}
+.photo::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(5,8,26,.45),transparent 40%);
+  opacity:0;transition:opacity .3s;}
+.photo:hover img{transform:scale(1.06);}
+.photo:hover::after{opacity:1;}
+.photo .del{
+  position:absolute;top:10px;right:10px;z-index:2;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(8,10,28,.7);border:1px solid var(--line-strong);
+  display:grid;place-items:center;
+  opacity:0;transform:translateY(-6px);transition:opacity .25s,transform .25s;
+}
+.photo:hover .del,.photo:focus-within .del{opacity:1;transform:none;}
+.photo .del svg{width:14px;height:14px;stroke:var(--rose-soft);stroke-width:2;fill:none;}
+.photo .tag{
+  position:absolute;left:12px;bottom:10px;z-index:2;
+  font-size:11px;letter-spacing:.14em;color:var(--gold);
+  background:rgba(8,10,28,.6);padding:3px 10px;border-radius:99px;
+  border:1px solid rgba(247,211,146,.35);
+  opacity:0;transition:opacity .3s;
+}
+.photo:hover .tag{opacity:1;}
+.gallery-empty{
+  display:none;text-align:center;padding:70px 30px;
+  border:1px dashed var(--line-strong);border-radius:var(--radius);
+  color:var(--dim);
+}
+.gallery-empty.show{display:block;}
+.gallery-empty p{margin-bottom:22px;}
+
+/* 灯箱 */
+.lightbox{
+  position:fixed;inset:0;z-index:80;
+  background:rgba(4,6,18,.94);
+  display:none;align-items:center;justify-content:center;
+  padding:70px 60px;
+}
+.lightbox.show{display:flex;}
+.lightbox img{max-width:100%;max-height:84vh;border-radius:12px;
+  box-shadow:0 30px 90px rgba(0,0,0,.7);}
+.lb-btn{
+  position:absolute;width:48px;height:48px;border-radius:50%;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.07);border:1px solid var(--line-strong);
+  transition:background .2s;
+}
+.lb-btn:hover{background:rgba(255,255,255,.16);}
+.lb-btn svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8;}
+.lb-close{top:22px;right:22px;}
+.lb-prev{left:18px;top:50%;transform:translateY(-50%);}
+.lb-next{right:18px;top:50%;transform:translateY(-50%);}
+.lb-count{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  color:var(--dim);font-size:13px;letter-spacing:.2em;}
+
+/* ============================================================
+   宇宙游乐场
+   ============================================================ */
+.hall{
+  display:grid;grid-template-columns:1fr;gap:16px;
+}
+.hall-card{
+  position:relative;
+  border:1px solid var(--line);border-radius:20px;
+  padding:26px 22px;
+  background:
+    radial-gradient(300px 140px at 90% -30px,rgba(247,211,146,.12),transparent 70%),
+    var(--card);
+  cursor:pointer;
+  transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .3s,box-shadow .3s;
+  text-align:left;
+}
+.hall-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(243,163,189,.45);
+  box-shadow:0 18px 44px rgba(0,0,0,.4);
+}
+.hall-card .h-icon{
+  width:48px;height:48px;border-radius:50%;
+  display:grid;place-items:center;margin-bottom:14px;
+  background:radial-gradient(circle at 35% 30%,rgba(255,225,235,.95),rgba(143,128,232,.6));
+  box-shadow:0 0 22px rgba(143,128,232,.35);
+}
+.hall-card .h-icon svg{width:23px;height:23px;fill:#2b1840;}
+.hall-card h3{font-family:var(--title-font);font-weight:400;font-size:21px;
+  letter-spacing:.06em;margin-bottom:6px;}
+.hall-card p{font-size:13.5px;color:var(--dim);line-height:1.8;}
+.hall-card .h-go{
+  display:inline-flex;align-items:center;gap:6px;margin-top:14px;
+  font-size:13px;color:var(--rose-soft);letter-spacing:.1em;
+}
+.hall-card .h-go svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
+
+.game-panel{display:none;}
+.game-panel.open{display:block;}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  flex-wrap:wrap;margin-bottom:22px;
+}
+.panel-head h3{font-family:var(--title-font);font-weight:400;font-size:26px;
+  letter-spacing:.08em;}
+.panel-head .back{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:14px;color:var(--dim);padding:9px 18px;border-radius:999px;
+  border:1px solid var(--line-strong);
+  transition:color .2s,border-color .2s;
+}
+.panel-head .back:hover{color:var(--rose-soft);border-color:var(--rose);}
+.panel-head .back svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+.panel-body{
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:
+    radial-gradient(560px 240px at 50% -100px,rgba(143,128,232,.16),transparent 70%),
+    var(--card);
+  padding:28px 20px;text-align:center;
+}
+.game-status{font-size:14px;color:var(--dim);margin-bottom:18px;min-height:22px;}
+.game-status b{color:var(--gold);font-weight:600;}
+
+/* 默契大挑战 */
+.quiz-q{
+  font-family:var(--title-font);font-size:clamp(19px,4.5vw,24px);
+  letter-spacing:.04em;margin:8px 0 22px;line-height:1.7;
+}
+.quiz-opts{display:grid;grid-template-columns:1fr;gap:11px;max-width:520px;margin:0 auto;}
+.quiz-opt{
+  display:flex;align-items:center;gap:13px;
+  padding:15px 18px;border-radius:14px;
+  border:1px solid var(--line-strong);background:rgba(9,12,32,.55);
+  font-size:15px;text-align:left;letter-spacing:.03em;
+  transition:border-color .2s,background .2s,transform .15s;
+}
+.quiz-opt:hover{border-color:var(--rose);background:rgba(243,163,189,.1);}
+.quiz-opt .q-key{
+  flex:none;width:30px;height:30px;border-radius:50%;
+  display:grid;place-items:center;font-size:13px;
+  background:rgba(255,255,255,.08);color:var(--gold);letter-spacing:0;
+}
+.quiz-opt.pickA{border-color:var(--rose);background:rgba(243,163,189,.16);}
+.quiz-opt.pickA .q-key{background:var(--rose);color:#2b1530;}
+.quiz-opt.pickB{border-color:var(--violet);background:rgba(143,128,232,.18);}
+.quiz-opt.pickB .q-key{background:var(--violet);color:#201540;}
+.quiz-opt.resultA{border-color:var(--rose);box-shadow:0 0 0 1px var(--rose) inset;}
+.quiz-opt.resultB{border-color:var(--violet);box-shadow:0 0 0 1px var(--violet) inset;}
+.quiz-opt.right{border-color:var(--gold);background:rgba(247,211,146,.14);}
+.quiz-opt.right .q-key{background:var(--gold);color:#2b1530;}
+.quiz-score{margin-top:20px;font-size:16px;color:var(--dim);}
+.quiz-score b{color:var(--rose-soft);font-size:24px;margin:0 4px;font-variant-numeric:tabular-nums;}
+.quiz-step{font-size:13px;color:var(--faint);letter-spacing:.12em;margin-bottom:6px;}
+
+/* 心动连连看 */
+.mem-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  max-width:430px;margin:0 auto;
+}
+.mem-card{
+  aspect-ratio:1/1.18;border-radius:14px;
+  border:1px solid var(--line-strong);
+  background:linear-gradient(160deg,#1c2350,#0d1130);
+  display:grid;place-items:center;cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:transform .18s,border-color .2s,background .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.mem-card:hover{transform:translateY(-2px);border-color:rgba(243,163,189,.5);}
+.mem-card .back-star{width:26px;height:26px;fill:var(--faint);opacity:.6;}
+.mem-card .face{
+  position:absolute;inset:0;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%,#241d4e,#121642);
+  opacity:0;transform:scale(.7);transition:opacity .22s,transform .22s;
+}
+.mem-card .face svg{width:46px;height:46px;}
+.mem-card.flipped .face,.mem-card.matched .face{opacity:1;transform:none;}
+.mem-card.flipped .back-star,.mem-card.matched .back-star{opacity:0;}
+.mem-card.matched{border-color:rgba(247,211,146,.55);background:rgba(247,211,146,.08);}
+
+/* 星空拼图 */
+.puzzle-board{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  width:min(340px,88vw);margin:0 auto;
+  aspect-ratio:1/1;position:relative;
+}
+.puzzle-cell{
+  border-radius:10px;overflow:hidden;
+  background:#0d1130;border:1px solid rgba(255,255,255,.06);
+  cursor:pointer;padding:0;
+  transition:transform .12s;
+}
+.puzzle-cell:hover{transform:scale(1.03);}
+.puzzle-cell img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.puzzle-cell.blank{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.1);}
+.puzzle-moves{margin-top:16px;font-size:14px;color:var(--dim);}
+.puzzle-moves b{color:var(--gold);margin:0 3px;}
+
+/* 星空井字棋 */
+.ttt-board{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  width:min(320px,86vw);margin:0 auto;
+}
+.ttt-cell{
+  aspect-ratio:1/1;border-radius:14px;
+  border:1px solid var(--line-strong);
+  background:rgba(9,12,32,.55);
+  display:grid;place-items:center;cursor:pointer;
+  transition:background .2s,border-color .2s,transform .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.ttt-cell:hover{border-color:rgba(243,163,189,.5);background:rgba(243,163,189,.08);}
+.ttt-cell svg{width:44px;height:44px;}
+.ttt-cell .h-heart{fill:var(--rose);filter:drop-shadow(0 0 8px rgba(243,163,189,.7));}
+.ttt-cell .h-star{fill:var(--gold);filter:drop-shadow(0 0 8px rgba(247,211,146,.7));}
+.ttt-turn{font-size:14px;color:var(--dim);margin-bottom:16px;}
+.ttt-turn b{font-weight:600;}
+.ttt-turn .who-heart{color:var(--rose);}
+.ttt-turn .who-star{color:var(--gold);}
+
+/* 情话制造机 */
+.lovegen-box{max-width:520px;margin:0 auto;}
+.lovegen-out{
+  min-height:110px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--title-font);font-size:clamp(18px,4.5vw,23px);
+  line-height:2;letter-spacing:.05em;
+  padding:26px 10px;margin-bottom:24px;
+  border:1px dashed var(--line-strong);border-radius:16px;
+  background:rgba(9,12,32,.4);
+}
+.lovegen-out.rolling{opacity:.4;}
+.lovegen-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+/* 游乐场首页切换 */
+.hall-back-row{display:flex;justify-content:flex-start;margin-bottom:22px;}
+
+/* ============================================================
+   游戏与星语签
+   ============================================================ */
+.play-wrap{display:grid;grid-template-columns:1fr;gap:22px;}
+.game-card{
+  position:relative;
+  border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;
+  background:
+    radial-gradient(500px 260px at 50% -80px,rgba(143,128,232,.22),transparent 70%),
+    linear-gradient(180deg,#0a0f2c 0%,#070a20 100%);
+  box-shadow:var(--shadow);
+}
+.game-hud{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;
+}
+.hud-score{font-size:15px;letter-spacing:.12em;color:var(--dim);}
+.hud-score b{font-size:24px;color:var(--gold);font-weight:600;margin-left:8px;
+  font-variant-numeric:tabular-nums;}
+.hud-lives{display:flex;gap:7px;}
+.hud-lives svg{width:20px;height:20px;fill:var(--rose);
+  filter:drop-shadow(0 0 6px rgba(243,163,189,.6));}
+.hud-lives svg.lost{fill:rgba(255,255,255,.12);filter:none;}
+#gameCanvas{display:block;width:100%;height:400px;touch-action:none;cursor:pointer;}
+.game-overlay{
+  position:absolute;inset:0;z-index:5;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:30px;
+  background:rgba(6,9,26,.55);
+  transition:opacity .35s;
+}
+.game-overlay.hidden{opacity:0;pointer-events:none;}
+.game-overlay h3{font-family:var(--title-font);font-size:clamp(26px,5vw,34px);
+  font-weight:400;letter-spacing:.08em;margin-bottom:12px;}
+.game-overlay p{color:var(--dim);font-size:14px;max-width:420px;margin-bottom:8px;}
+.game-overlay .legend{display:flex;gap:22px;justify-content:center;margin:18px 0 26px;flex-wrap:wrap;}
+.game-overlay .legend i{display:flex;align-items:center;gap:7px;font-style:normal;
+  font-size:13px;color:var(--dim);}
+.game-overlay .legend b{font-weight:400;}
+.doticon{width:16px;height:16px;border-radius:50%;display:inline-block;}
+.game-overlay .final-score{font-size:15px;color:var(--dim);margin-bottom:6px;}
+.game-overlay .final-score b{color:var(--gold);font-size:30px;margin:0 4px;}
+.game-overlay .verdict{
+  font-family:var(--title-font);font-size:19px;color:var(--rose-soft);
+  max-width:480px;margin-bottom:26px;letter-spacing:.05em;
+}
+
+.fortune-card{
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--card);padding:38px 28px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+  box-shadow:var(--shadow);
+}
+.fortune-card h3{font-family:var(--title-font);font-weight:400;
+  font-size:26px;letter-spacing:.12em;margin-bottom:6px;}
+.fortune-card .f-sub{font-size:13px;color:var(--faint);letter-spacing:.14em;margin-bottom:26px;}
+.crystal{
+  width:128px;height:128px;border-radius:50%;position:relative;
+  margin-bottom:26px;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#d9cffb,#8f80e8 45%,#4a3fa0 100%);
+  box-shadow:0 0 50px rgba(143,128,232,.5),inset -10px -14px 30px rgba(30,20,80,.55),
+    inset 8px 10px 24px rgba(255,255,255,.25);
+  display:grid;place-items:center;
+  animation:floaty 4s ease-in-out infinite;
+  transition:transform .3s;
+}
+.crystal:hover{transform:scale(1.05);}
+.crystal:active{transform:scale(.95);}
+.crystal::before{content:"";position:absolute;inset:-14px;border-radius:50%;
+  border:1px dashed rgba(247,211,146,.4);animation:spin 14s linear infinite;}
+.crystal::after{content:"";position:absolute;top:16px;left:26px;width:30px;height:20px;
+  border-radius:50%;background:rgba(255,255,255,.45);filter:blur(4px);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.crystal svg{width:44px;height:44px;fill:#fff7e0;position:relative;z-index:2;
+  filter:drop-shadow(0 0 10px rgba(255,230,170,.9));}
+.fortune-text{
+  min-height:76px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--title-font);font-size:19px;line-height:1.9;letter-spacing:.05em;
+  color:var(--ink);max-width:380px;margin-bottom:24px;
+}
+.fortune-text.drawing{opacity:.35;}
+
+/* ============================================================
+   页脚
+   ============================================================ */
+footer{
+  position:relative;z-index:10;text-align:center;
+  padding:70px 24px 54px;border-top:1px solid var(--line);
+  background:linear-gradient(180deg,transparent,rgba(10,15,43,.7));
+}
+footer .f-quote{font-family:var(--title-font);font-size:clamp(20px,4vw,26px);
+  letter-spacing:.1em;color:var(--rose-soft);margin-bottom:14px;}
+footer .f-names{font-size:14px;color:var(--dim);letter-spacing:.1em;}
+footer .f-names b{color:var(--gold);font-weight:600;}
+footer .f-small{font-size:12px;color:var(--faint);margin-top:18px;letter-spacing:.2em;}
+
+/* ============================================================
+   设置弹层
+   ============================================================ */
+.modal{
+  position:fixed;inset:0;z-index:90;
+  display:none;align-items:center;justify-content:center;padding:22px;
+  background:rgba(4,6,18,.7);
+}
+.modal.show{display:flex;}
+.modal-box{
+  width:100%;max-width:420px;
+  background:linear-gradient(180deg,#12173a,#0b0f29);
+  border:1px solid var(--line-strong);border-radius:var(--radius);
+  padding:34px 30px 28px;box-shadow:var(--shadow);
+}
+.modal-box h3{font-family:var(--title-font);font-weight:400;font-size:26px;
+  letter-spacing:.1em;margin-bottom:6px;text-align:center;}
+.modal-box .m-sub{text-align:center;font-size:13px;color:var(--faint);margin-bottom:26px;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:13px;color:var(--dim);letter-spacing:.1em;margin-bottom:8px;}
+.field input{
+  width:100%;padding:12px 15px;font-size:16px;font-family:inherit;
+  color:var(--ink);background:rgba(8,11,30,.8);
+  border:1px solid var(--line-strong);border-radius:12px;
+}
+.field input[type="date"]{color-scheme:dark;}
+.field input:focus{border-color:var(--rose);outline:none;}
+.modal-actions{display:flex;gap:12px;margin-top:26px;}
+.modal-actions .btn{flex:1;justify-content:center;padding:12px 10px;}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+@media (min-width:560px){
+  .traits-grid{grid-template-columns:repeat(2,1fr);}
+  .hall{grid-template-columns:repeat(2,1fr);}
+  .quiz-opts{grid-template-columns:repeat(2,1fr);}
+  .quiz-opt{flex-direction:column;align-items:flex-start;gap:10px;}
+  .quiz-opt .q-key{margin-bottom:2px;}
+}
+@media (min-width:760px){
+  section{padding:110px 40px;}
+  .clock-grid{gap:16px;}
+  .clock-cell{padding:22px 10px 18px;}
+  .gallery-grid{column-count:3;column-gap:18px;}
+  .photo{margin-bottom:18px;}
+  .play-wrap{grid-template-columns:1.7fr 1fr;align-items:stretch;}
+  .milestones{grid-template-columns:repeat(4,1fr);}
+  .traits-grid{grid-template-columns:repeat(4,1fr);}
+  .hall{grid-template-columns:repeat(3,1fr);}
+  #gameCanvas{height:460px;}
+}
+@media (max-width:420px){
+  .clock-grid{gap:7px;}
+  .clock-cell{padding:13px 4px 10px;}
+  .lightbox{padding:60px 14px;}
+  .lb-prev{left:8px;}
+  .lb-next{right:8px;}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  .reveal{opacity:1;transform:none;transition:none;}
+  .hero-names .heart svg,.hero-scroll svg,.crystal,.mile.next{animation:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- 宇宙背景 -->
+<canvas id="space" aria-hidden="true"></canvas>
+<div class="nebula" aria-hidden="true">
+  <span class="n1"></span><span class="n2"></span><span class="n3"></span><span class="n4"></span>
+</div>
+<div id="progress" aria-hidden="true"></div>
+
+<!-- 顶栏 -->
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z" fill="#f3a3bd"/>
+      <circle cx="16" cy="4" r="1.6" fill="#f7d392"/>
+    </svg>
+    <div>我们的宇宙<small>OUR&nbsp;UNIVERSE</small></div>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" id="soundBtn" aria-label="音效开关" title="音效开关">
+      <svg viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path id="soundWave" d="M15.5 8.5a5 5 0 010 7M18 6a8.5 8.5 0 010 12"/></svg>
+    </button>
+    <button class="icon-btn" id="settingBtn" aria-label="设置名字与恋爱日期" title="设置">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 00.32 1.76l.06.06a2 2 0 11-2.83 2.83l-.06-.06A1.6 1.6 0 0015 19.4a1.6 1.6 0 00-1 1.48V21a2 2 0 11-4 0v-.12A1.6 1.6 0 009 19.4a1.6 1.6 0 00-1.76.32l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.6 1.6 0 004.6 15a1.6 1.6 0 00-1.48-1H3a2 2 0 110-4h.12A1.6 1.6 0 004.6 9a1.6 1.6 0 00-.32-1.76l-.06-.06a2 2 0 112.83-2.83l.06.06A1.6 1.6 0 009 4.6a1.6 1.6 0 001-1.48V3a2 2 0 114 0v.12A1.6 1.6 0 0015 4.6a1.6 1.6 0 001.76-.32l.06-.06a2 2 0 112.83 2.83l-.06.06a1.6 1.6 0 00-.32 1.76 1.6 1.6 0 001.48 1H21a2 2 0 110 4h-.12a1.6 1.6 0 00-1.48 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- ===== 视图：Hero ===== -->
+  <section id="hero">
+    <p class="hero-eyebrow">写 给 我 最 爱 的 你</p>
+    <h1 class="hero-title">整个宇宙<br><span class="accent">都为你展开</span></h1>
+    <p class="hero-names">
+      <span id="heroNameA">我</span>
+      <span class="heart" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z"/></svg></span>
+      <span id="heroNameB">暴娜娜</span>
+    </p>
+    <p class="hero-since">这一整个宇宙，为 <b id="heroSinceName">暴娜娜</b> 而亮 · 我们的故事自 <b id="heroSince">2024.05.20</b> 开始</p>
+    <div class="hero-days">
+      <span>已经一起走过</span>
+      <b id="heroDays">0</b><span>天</span>
+    </div>
+    <a class="hero-scroll" href="#countdown" aria-label="向下滚动">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+      探索我们的宇宙
+    </a>
+  </section>
+
+  <!-- ===== 视图：恋爱倒计时 ===== -->
+  <section id="countdown">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">星际时间</p>
+      <h2>我们的星际时间</h2>
+      <p class="sec-sub">从相爱的那一刻起，宇宙开始了属于我们的新纪元</p>
+    </div>
+    <div class="clock-card reveal">
+      <p class="clock-line">我 们 已 经 相 爱 了</p>
+      <div class="clock-grid">
+        <div class="clock-cell"><b id="cdDays">0</b><span>天</span></div>
+        <div class="clock-cell"><b id="cdHours">00</b><span>时</span></div>
+        <div class="clock-cell"><b id="cdMins">00</b><span>分</span></div>
+        <div class="clock-cell"><b id="cdSecs">00</b><span>秒</span></div>
+      </div>
+      <p class="clock-extra" id="cdExtra"></p>
+      <div class="next-mile">
+        <div class="nm-top">
+          <span class="nm-label">下一站 · <b id="nmName">第 100 天</b></span>
+          <span class="nm-days">还有 <b id="nmDays">0</b> 天</span>
+        </div>
+        <div class="nm-bar"><i id="nmBar"></i></div>
+      </div>
+    </div>
+    <div class="milestones reveal" id="milestones"></div>
+  </section>
+
+  <!-- ===== 视图：她的宇宙说明书 ===== -->
+  <section id="about">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">她的宇宙说明书</p>
+      <h2 id="aboutTitle">关于娜娜的观测记录</h2>
+      <p class="sec-sub" id="aboutSub">经过长期观测，我整理了关于她的若干条宇宙级事实</p>
+    </div>
+    <div class="traits-grid reveal" id="traitsGrid"></div>
+    <div class="traits-actions reveal">
+      <button class="btn" id="addTraitBtn">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        添加一条她的特征
+      </button>
+      <button class="btn ghost" id="resetTraitBtn">恢复出厂情话</button>
+    </div>
+  </section>
+
+  <!-- ===== 视图：照片墙 ===== -->
+  <section id="gallery">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">星河里的我们</p>
+      <h2>把每一颗星星都收藏</h2>
+      <p class="sec-sub">每一张合照，都是宇宙偷偷塞给我们的糖</p>
+    </div>
+    <div class="gallery-bar reveal">
+      <p class="gallery-tip">点击照片可以放大查看 · 照片只保存在你自己的浏览器里</p>
+      <button class="btn solid" id="uploadBtn">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        上传我们的照片
+      </button>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="gallery-empty" id="galleryEmpty">
+      <p>这里还空着，像等待星光的夜空。<br>上传第一张合照，让宇宙开始亮起来吧。</p>
+      <button class="btn solid" id="uploadEmptyBtn">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5l5 5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        上传第一张照片
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== 视图：游戏与星语签 ===== -->
+  <section id="play">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">宇宙小游戏</p>
+      <h2>星海捕心</h2>
+      <p class="sec-sub">移动你的月亮船，替我把散落的星星都收起来吧</p>
+    </div>
+    <div class="play-wrap reveal">
+      <div class="game-card">
+        <div class="game-hud">
+          <span class="hud-score">得分<b id="gameScore">0</b></span>
+          <span class="hud-lives" id="hudLives" aria-label="剩余生命"></span>
+        </div>
+        <canvas id="gameCanvas" aria-label="星海捕心小游戏"></canvas>
+        <div class="game-overlay" id="gameOverlay">
+          <h3 id="ovTitle">星海捕心</h3>
+          <p id="ovDesc">夜空中的星星掉下来了。移动鼠标或手指，驾驶月亮船接住它们，小心躲开陨石。</p>
+          <div class="legend">
+            <i><span class="doticon" style="background:#f3a3bd"></span><b>爱心 +1</b></i>
+            <i><span class="doticon" style="background:#f7d392"></span><b>金星 +5</b></i>
+            <i><span class="doticon" style="background:#6e6a8c"></span><b>陨石 -1 颗心</b></i>
+          </div>
+          <button class="btn solid" id="startBtn">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            开始游戏
+          </button>
+        </div>
+      </div>
+      <aside class="fortune-card">
+        <h3>星语签</h3>
+        <p class="f-sub">今 日 宇 宙 密 语</p>
+        <div class="crystal" id="drawBtn" role="button" tabindex="0" aria-label="抽取星语签">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.3 6.4L21 9l-5 4.2 1.7 6.6L12 16.3 6.3 19.8 8 13.2 3 9l6.7-.6z"/></svg>
+        </div>
+        <p class="fortune-text" id="fortuneText">点击水晶星球，<br>领取今天的宇宙想对你说的话</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===== 视图：宇宙游乐场 ===== -->
+  <section id="playground">
+    <div class="sec-head reveal">
+      <p class="sec-kicker">宇宙游乐场</p>
+      <h2>为你搭建的小小宇宙</h2>
+      <p class="sec-sub">挑一个喜欢的小游戏，玩到宇宙打烊</p>
+    </div>
+
+    <!-- 游戏大厅 -->
+    <div class="hall reveal" id="hall">
+      <button class="hall-card" data-open="quiz">
+        <span class="h-icon"><svg viewBox="0 0 24 24"><path d="M9 4h6v3h3v5h-3v3h-6v-3H6V7h3V4zm1 1v4h4V5h-4zM6 16l1.8 3.8L11.5 21l-2.7 1.2L7 26l-1.8-3.8L2.5 21l2.7-1.2z" transform="translate(2 -2) scale(.85)"/></svg></span>
+        <h3>默契大挑战</h3>
+        <p>一起回答关于暴娜娜的小问题，看看你们的默契度有多高。题库支持自己添加。</p>
+        <span class="h-go">进入游戏<svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="hall-card" data-open="memory">
+        <span class="h-icon"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 6.4L21 10l-5 4.3 1.6 6.7L12 17.6 6.4 21 8 14.3 3 10l6.4-.6z"/></svg></span>
+        <h3>心动连连看</h3>
+        <p>翻开心心卡片，把成双成对的宇宙符号找出来，全部配对就能召唤一场星星雨。</p>
+        <span class="h-go">进入游戏<svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="hall-card" data-open="puzzle">
+        <span class="h-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span>
+        <h3>星空拼图</h3>
+        <p>把被打乱的星空拼回原样。每一次归位，都像我们把彼此拼进人生。</p>
+        <span class="h-go">进入游戏<svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="hall-card" data-open="ttt">
+        <span class="h-icon"><svg viewBox="0 0 32 32"><path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z"/></svg></span>
+        <h3>星空井字棋</h3>
+        <p>爱心队和星星队轮流出击，三连即胜。赢了的人，今晚负责说晚安。</p>
+        <span class="h-go">进入游戏<svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="hall-card" data-open="lovegen">
+        <span class="h-icon"><svg viewBox="0 0 24 24"><path d="M12 2l2.1 7.2L21 12l-6.9 2.8L12 22l-2.1-7.2L3 12l6.9-2.8z"/></svg></span>
+        <h3>情话制造机</h3>
+        <p>随机组合出一句属于你们的情话，不满意就再来一次，满意的直接复制发给她。</p>
+        <span class="h-go">进入游戏<svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="hall-card" data-open="wish">
+        <span class="h-icon"><svg viewBox="0 0 24 24"><path d="M12 2l1.5 4.8L18 8l-4.5 1.2L12 14l-1.5-4.8L6 8l4.5-1.2zM5 16l1 3 3 1-3 1-1 3-1-3-3-1 3-1zM19 13l.8 2.2 2.2.8-2.2.8L19 19l-.8-2.2-2.2-.8 2.2-.8z"/></svg></span>
+        <h3>许愿星球</h3>
+        <p>把想对彼此说的话、想一起做的事，写进星球里。你许的愿，TA 都能看见。</p>
+        <span class="h-go">进入游戏<svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6l6 6-6 6"/></svg></span>
+      </button>
+    </div>
+
+    <!-- 默契大挑战 -->
+    <div class="game-panel" id="panel-quiz">
+      <div class="panel-head">
+        <h3>默契大挑战</h3>
+        <button class="back" data-back="quiz"><svg viewBox="0 0 24 24"><path d="M19 12H5m6-6l-6 6 6 6"/></svg>返回大厅</button>
+      </div>
+      <div class="panel-body">
+        <p class="quiz-step" id="quizStep"></p>
+        <p class="quiz-q" id="quizQ"></p>
+        <div class="quiz-opts" id="quizOpts"></div>
+        <p class="game-status" id="quizStatus">两个人背靠背，各自选出心里的答案</p>
+        <p class="quiz-score" id="quizScore"></p>
+        <div class="lovegen-actions" style="margin-top:22px;" id="quizActions"></div>
+      </div>
+    </div>
+
+    <!-- 心动连连看 -->
+    <div class="game-panel" id="panel-memory">
+      <div class="panel-head">
+        <h3>心动连连看</h3>
+        <button class="back" data-back="memory"><svg viewBox="0 0 24 24"><path d="M19 12H5m6-6l-6 6 6 6"/></svg>返回大厅</button>
+      </div>
+      <div class="panel-body">
+        <p class="game-status" id="memStatus">翻卡片，找到成双成对的宇宙符号</p>
+        <div class="mem-grid" id="memGrid"></div>
+        <p class="puzzle-moves" id="memStats"></p>
+        <div class="lovegen-actions" style="margin-top:18px;" id="memActions"></div>
+      </div>
+    </div>
+
+    <!-- 星空拼图 -->
+    <div class="game-panel" id="panel-puzzle">
+      <div class="panel-head">
+        <h3>星空拼图</h3>
+        <button class="back" data-back="puzzle"><svg viewBox="0 0 24 24"><path d="M19 12H5m6-6l-6 6 6 6"/></svg>返回大厅</button>
+      </div>
+      <div class="panel-body">
+        <p class="game-status" id="puzzleStatus">点击相邻方块，把星空拼回原样</p>
+        <div class="puzzle-board" id="puzzleBoard"></div>
+        <p class="puzzle-moves">已移动 <b id="puzzleMoves">0</b> 步</p>
+        <div class="lovegen-actions" style="margin-top:18px;" id="puzzleActions"></div>
+      </div>
+    </div>
+
+    <!-- 星空井字棋 -->
+    <div class="game-panel" id="panel-ttt">
+      <div class="panel-head">
+        <h3>星空井字棋</h3>
+        <button class="back" data-back="ttt"><svg viewBox="0 0 24 24"><path d="M19 12H5m6-6l-6 6 6 6"/></svg>返回大厅</button>
+      </div>
+      <div class="panel-body">
+        <p class="ttt-turn" id="tttTurn"></p>
+        <div class="ttt-board" id="tttBoard"></div>
+        <p class="game-status" id="tttStatus"></p>
+        <div class="lovegen-actions" style="margin-top:18px;" id="tttActions"></div>
+      </div>
+    </div>
+
+    <!-- 情话制造机 -->
+    <div class="game-panel" id="panel-lovegen">
+      <div class="panel-head">
+        <h3>情话制造机</h3>
+        <button class="back" data-back="lovegen"><svg viewBox="0 0 24 24"><path d="M19 12H5m6-6l-6 6 6 6"/></svg>返回大厅</button>
+      </div>
+      <div class="panel-body">
+        <div class="lovegen-box">
+          <p class="lovegen-out" id="lovegenOut">点一下「生成情话」，宇宙就开始写诗</p>
+          <div class="lovegen-actions">
+            <button class="btn solid" id="lovegenBtn"><svg viewBox="0 0 24 24"><path d="M12 3l2.1 7.2L21 12l-6.9 2.8L12 22l-2.1-7.2L3 12l6.9-2.8z"/></svg>生成情话</button>
+            <button class="btn ghost" id="lovegenCopy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>复制情话</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 许愿星球 -->
+    <div class="game-panel" id="panel-wish">
+      <div class="panel-head">
+        <h3>许愿星球</h3>
+        <button class="back" data-back="wish"><svg viewBox="0 0 24 24"><path d="M19 12H5m6-6l-6 6 6 6"/></svg>返回大厅</button>
+      </div>
+      <div class="panel-body">
+        <div class="lovegen-box">
+          <div class="lovegen-actions" style="margin-bottom:20px;">
+            <input id="wishInput" type="text" maxlength="60" style="flex:1;min-width:220px;padding:12px 15px;font-size:15px;font-family:inherit;color:var(--ink);background:rgba(8,11,30,.8);border:1px solid var(--line-strong);border-radius:12px;" placeholder="写下你想和 TA 一起做的事……">
+            <button class="btn solid" id="wishSend"><svg viewBox="0 0 24 24"><path d="M12 19V5m0 0L6 11m6-6l6 6"/></svg>发射心愿</button>
+          </div>
+          <div id="wishList" style="display:flex;flex-direction:column;gap:12px;max-width:520px;margin:0 auto;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p class="f-quote">从遇见你的那天起，宇宙才有了意义。</p>
+  <p class="f-names" id="footNames"></p>
+  <p class="f-small">整 个 宇 宙 都 为 你 展 开</p>
+</footer>
+
+<!-- 设置弹层 -->
+<div class="modal" id="settingModal" role="dialog" aria-modal="true" aria-label="设置">
+  <div class="modal-box">
+    <h3>定制我们的宇宙</h3>
+    <p class="m-sub">填上名字和相爱的日子，星星会记住它们</p>
+    <div class="field">
+      <label for="inputNameA">你的名字</label>
+      <input id="inputNameA" type="text" maxlength="12" placeholder="我">
+    </div>
+    <div class="field">
+      <label for="inputNameB">TA 的名字</label>
+      <input id="inputNameB" type="text" maxlength="12" placeholder="暴娜娜">
+    </div>
+    <div class="field">
+      <label for="inputDate">恋爱开始的日子</label>
+      <input id="inputDate" type="date">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="cancelSetting">取消</button>
+      <button class="btn solid" id="saveSetting">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 灯箱 -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="照片预览">
+  <button class="lb-btn lb-close" id="lbClose" aria-label="关闭">
+    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <button class="lb-btn lb-prev" id="lbPrev" aria-label="上一张">
+    <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <img id="lbImg" src="" alt="我们的照片">
+  <button class="lb-btn lb-next" id="lbNext" aria-label="下一张">
+    <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+  <span class="lb-count" id="lbCount"></span>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" multiple hidden>
+
+<!-- 默认照片素材：路径静态写在 src 中，初始化时读取 -->
+<div hidden id="defaultPhotos" aria-hidden="true">
+  <img src="assets/p1-starry-hill.jpg" alt="默认照片">
+  <img src="assets/p2-moon.jpg" alt="默认照片">
+  <img src="assets/p3-heart-nebula.jpg" alt="默认照片">
+  <img src="assets/p4-meteor.jpg" alt="默认照片">
+  <img src="assets/p5-pinky-promise.jpg" alt="默认照片">
+  <img src="assets/p6-star-bottle.jpg" alt="默认照片">
+</div>
+
+<script>
+/* ============================================================
+   1. 全局配置（localStorage）
+   ============================================================ */
+var CFG_KEY = "our-universe-config-v1";
+var DEFAULT_CFG = { nameA: "我", nameB: "暴娜娜", startDate: "2024-05-20" };
+var cfg = loadCfg();
+
+function loadCfg(){
+  try{
+    var raw = localStorage.getItem(CFG_KEY);
+    if(raw){
+      var o = JSON.parse(raw);
+      return {
+        nameA: o.nameA || DEFAULT_CFG.nameA,
+        nameB: o.nameB || DEFAULT_CFG.nameB,
+        startDate: o.startDate || DEFAULT_CFG.startDate
+      };
+    }
+  }catch(e){}
+  return Object.assign({}, DEFAULT_CFG);
+}
+function saveCfg(){
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){}
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(m){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+  });
+}
+function pad2(n){ return n < 10 ? "0" + n : "" + n; }
+
+/* ============================================================
+   2. 星空 Canvas 背景（星星闪烁 + 流星）
+   ============================================================ */
+(function starfield(){
+  var canvas = document.getElementById("space");
+  var ctx = canvas.getContext("2d");
+  var W = 0, H = 0, DPR = 1, stars = [], meteors = [], nextMeteor = 0;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var count = Math.round(Math.min(340, (W * H) / 4200));
+    stars = [];
+    for(var i = 0; i < count; i++){
+      var layer = Math.random() < 0.55 ? 0.4 : (Math.random() < 0.7 ? 0.75 : 1.1);
+      var roll = Math.random();
+      var tint = roll < 0.12 ? "#f7d392" : (roll < 0.22 ? "#f3a3bd" : (roll < 0.32 ? "#b7acf5" : "#fdfbff"));
+      stars.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: (Math.random() * 1.1 + 0.35) * layer,
+        layer: layer,
+        base: Math.random() * 0.55 + 0.35,
+        tw: Math.random() * 0.9 + 0.3,
+        ph: Math.random() * Math.PI * 2,
+        tint: tint
+      });
+    }
+  }
+
+  function spawnMeteor(){
+    var fromLeft = Math.random() < 0.25;
+    meteors.push({
+      x: fromLeft ? Math.random() * W * 0.3 : W * 0.55 + Math.random() * W * 0.5,
+      y: -20,
+      vx: (fromLeft ? 1 : -1) * (2.6 + Math.random() * 2.2),
+      vy: 4.6 + Math.random() * 2.6,
+      life: 1
+    });
+  }
+
+  function draw(t){
+    ctx.clearRect(0, 0, W, H);
+    mouse.x += (mouse.tx - mouse.x) * 0.04;
+    mouse.y += (mouse.ty - mouse.y) * 0.04;
+
+    for(var i = 0; i < stars.length; i++){
+      var s = stars[i];
+      var px = s.x + (mouse.x - 0.5) * 26 * s.layer;
+      var py = s.y + (mouse.y - 0.5) * 26 * s.layer;
+      var a = s.base;
+      if(!reduced){ a = s.base + Math.sin(t * 0.001 * s.tw + s.ph) * 0.32; }
+      a = Math.max(0.08, Math.min(1, a));
+      ctx.globalAlpha = a;
+      ctx.fillStyle = s.tint;
+      ctx.beginPath();
+      ctx.arc(px, py, s.r, 0, Math.PI * 2);
+      ctx.fill();
+      if(s.r > 1.15){
+        ctx.globalAlpha = a * 0.25;
+        ctx.beginPath();
+        ctx.arc(px, py, s.r * 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    if(!reduced && t > nextMeteor){
+      spawnMeteor();
+      nextMeteor = t + 2600 + Math.random() * 5200;
+    }
+    for(var j = meteors.length - 1; j >= 0; j--){
+      var m = meteors[j];
+      m.x += m.vx; m.y += m.vy; m.life -= 0.008;
+      var tail = 110;
+      var grad = ctx.createLinearGradient(m.x, m.y, m.x - m.vx * tail / 6, m.y - m.vy * tail / 6);
+      grad.addColorStop(0, "rgba(255,240,210," + (0.85 * m.life) + ")");
+      grad.addColorStop(1, "rgba(255,240,210,0)");
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y);
+      ctx.lineTo(m.x - m.vx * 14, m.y - m.vy * 14);
+      ctx.stroke();
+      if(m.life <= 0 || m.y > H + 60 || m.x < -120 || m.x > W + 120){
+        meteors.splice(j, 1);
+      }
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener("resize", resize);
+  window.addEventListener("pointermove", function(e){
+    mouse.tx = e.clientX / window.innerWidth;
+    mouse.ty = e.clientY / window.innerHeight;
+  }, { passive: true });
+  document.addEventListener("visibilitychange", function(){
+    if(!document.hidden){ nextMeteor = 0; }
+  });
+  resize();
+  nextMeteor = 1400;
+  requestAnimationFrame(draw);
+})();
+
+/* ============================================================
+   3. 恋爱倒计时 & 里程碑
+   ============================================================ */
+var MILESTONES = [
+  { day: 100,  name: "第 100 天" },
+  { day: 365,  name: "一周年" },
+  { day: 520,  name: "第 520 天" },
+  { day: 730,  name: "两周年" },
+  { day: 1000, name: "第 1000 天" },
+  { day: 1314, name: "第 1314 天" },
+  { day: 2000, name: "第 2000 天" },
+  { day: 3650, name: "十周年" }
+];
+var DAY_MS = 86400000;
+var STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 3l2.6 6.4L21 10l-5 4.3 1.6 6.7L12 17.6 6.4 21 8 14.3 3 10l6.4-.6z"/></svg>';
+var CHECK_SVG = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+
+function startOfDay(d){
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+function formatDateCN(ms){
+  var d = new Date(ms);
+  return d.getFullYear() + "." + pad2(d.getMonth() + 1) + "." + pad2(d.getDate());
+}
+function renderMilestones(){
+  var start = startOfDay(new Date(cfg.startDate + "T00:00:00"));
+  var box = document.getElementById("milestones");
+  var html = "";
+  MILESTONES.forEach(function(m){
+    var date = start + m.day * DAY_MS;
+    html += '<div class="mile" data-day="' + m.day + '">' +
+      '<span class="dot">' + STAR_SVG + '</span>' +
+      '<div><div class="m-name">' + m.name + '</div>' +
+      '<div class="m-date">' + formatDateCN(date) + '</div></div></div>';
+  });
+  box.innerHTML = html;
+}
+
+function tickClock(){
+  var start = new Date(cfg.startDate + "T00:00:00").getTime();
+  var now = Date.now();
+  if(isNaN(start)){ return; }
+  var diff = Math.max(0, now - start);
+  var startDay = startOfDay(new Date(start));
+  var todayStart = startOfDay(new Date(now));
+  var fullDays = Math.floor((todayStart - startDay) / DAY_MS);
+  var intoToday = now - todayStart;
+  var hours = Math.floor(intoToday / 3600000);
+  var mins = Math.floor((intoToday % 3600000) / 60000);
+  var secs = Math.floor((intoToday % 60000) / 1000);
+
+  document.getElementById("cdDays").textContent = fullDays;
+  document.getElementById("cdHours").textContent = pad2(hours);
+  document.getElementById("cdMins").textContent = pad2(mins);
+  document.getElementById("cdSecs").textContent = pad2(secs);
+  document.getElementById("heroDays").textContent = fullDays;
+
+  document.getElementById("cdExtra").innerHTML =
+    "今天是我们在一起的 <b>第 " + (fullDays + 1) + " 天</b>，" +
+    "已经拥有 " + (fullDays * 24 + hours) + " 个小时的星光";
+
+  // 下一个里程碑
+  var nextM = null;
+  for(var i = 0; i < MILESTONES.length; i++){
+    if(MILESTONES[i].day > fullDays){ nextM = MILESTONES[i]; break; }
+  }
+  var mileNodes = document.querySelectorAll(".mile");
+  mileNodes.forEach(function(node){
+    var d = parseInt(node.getAttribute("data-day"), 10);
+    node.classList.toggle("done", d <= fullDays);
+    node.classList.toggle("next", nextM && d === nextM.day);
+    node.querySelector(".dot").innerHTML = d <= fullDays ? CHECK_SVG : STAR_SVG;
+  });
+  if(nextM){
+    var remain = nextM.day - fullDays;
+    var prev = MILESTONES[Math.max(0, i - 1)];
+    var span = nextM.day - prev.day;
+    var progressed = fullDays - prev.day;
+    var pct = Math.max(4, Math.min(96, progressed / span * 100));
+    document.getElementById("nmName").textContent = nextM.name;
+    document.getElementById("nmDays").textContent = remain;
+    document.getElementById("nmBar").style.width = pct + "%";
+  }else{
+    document.getElementById("nmName").textContent = "更远的未来";
+    document.getElementById("nmDays").textContent = "∞";
+    document.getElementById("nmBar").style.width = "100%";
+  }
+}
+
+/* ============================================================
+   4. 页面通用：顶栏、进度条、入场动画
+   ============================================================ */
+function bindChrome(){
+  var topbar = document.getElementById("topbar");
+  var progress = document.getElementById("progress");
+  function onScroll(){
+    var y = window.scrollY;
+    topbar.classList.toggle("scrolled", y > 40);
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h > 0 ? (y / h) * 100 : 0) + "%";
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        en.target.classList.add("in");
+        io.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+}
+
+/* ============================================================
+   5. 名字渲染与设置弹层
+   ============================================================ */
+function renderNames(){
+  document.getElementById("heroNameA").textContent = cfg.nameA;
+  document.getElementById("heroNameB").textContent = cfg.nameB;
+  document.getElementById("heroSinceName").textContent = cfg.nameB;
+  document.getElementById("heroSince").textContent = cfg.startDate.replace(/-/g, ".");
+  var heartMini = '<svg viewBox="0 0 32 32" aria-hidden="true" style="width:13px;height:13px;fill:#f3a3bd;vertical-align:-2px;margin:0 6px;"><path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z"/></svg>';
+  document.getElementById("footNames").innerHTML =
+    "<b>" + escapeHtml(cfg.nameA) + "</b>" + heartMini + "<b>" + escapeHtml(cfg.nameB) + "</b>" +
+    "<br>自 <b>" + cfg.startDate.replace(/-/g, ".") + "</b> 起，共享同一片星空";
+}
+function bindSetting(){
+  var modal = document.getElementById("settingModal");
+  var inA = document.getElementById("inputNameA");
+  var inB = document.getElementById("inputNameB");
+  var inD = document.getElementById("inputDate");
+  function open(){
+    inA.value = cfg.nameA === DEFAULT_CFG.nameA ? "" : cfg.nameA;
+    inB.value = cfg.nameB === DEFAULT_CFG.nameB ? "" : cfg.nameB;
+    inD.value = cfg.startDate;
+    modal.classList.add("show");
+    setTimeout(function(){ inA.focus(); }, 120);
+  }
+  function close(){ modal.classList.remove("show"); }
+  document.getElementById("settingBtn").addEventListener("click", open);
+  document.getElementById("cancelSetting").addEventListener("click", close);
+  modal.addEventListener("click", function(e){ if(e.target === modal){ close(); } });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && modal.classList.contains("show")){ close(); }
+  });
+  document.getElementById("saveSetting").addEventListener("click", function(){
+    cfg.nameA = (inA.value.trim() || DEFAULT_CFG.nameA).slice(0, 12);
+    cfg.nameB = (inB.value.trim() || DEFAULT_CFG.nameB).slice(0, 12);
+    if(inD.value){ cfg.startDate = inD.value; }
+    saveCfg();
+    renderNames();
+    tickClock();
+    renderMilestones();
+    tickClock();
+    refreshTraitsForName();
+    close();
+    toast("已保存，星星记下了你们的故事");
+  });
+}
+
+/* 轻量 toast */
+var toastTimer = null;
+function toast(msg){
+  var el = document.getElementById("toast");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "toast";
+    el.style.cssText = "position:fixed;left:50%;bottom:46px;transform:translateX(-50%) translateY(16px);" +
+      "background:rgba(18,23,52,.92);border:1px solid rgba(255,255,255,.18);color:#f1eefd;" +
+      "padding:11px 22px;border-radius:999px;font-size:14px;letter-spacing:.06em;z-index:120;" +
+      "opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:86vw;text-align:center;";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  requestAnimationFrame(function(){
+    el.style.opacity = "1";
+    el.style.transform = "translateX(-50%) translateY(0)";
+  });
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){
+    el.style.opacity = "0";
+    el.style.transform = "translateX(-50%) translateY(16px)";
+  }, 2400);
+}
+
+/* ============================================================
+   6. 照片墙（IndexedDB 持久化 + 灯箱 + 上传压缩）
+   ============================================================ */
+var DB_NAME = "our-universe-db", DB_VER = 1, STORE = "photos";
+var photos = [];
+var lbIndex = 0;
+
+function openDB(){
+  return new Promise(function(resolve, reject){
+    var req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = function(e){
+      var db = e.target.result;
+      if(!db.objectStoreNames.contains(STORE)){
+        db.createObjectStore(STORE, { keyPath: "id" });
+      }
+    };
+    req.onsuccess = function(){ resolve(req.result); };
+    req.onerror = function(){ reject(req.error); };
+  });
+}
+function dbGetAll(db){
+  return new Promise(function(resolve, reject){
+    var tx = db.transaction(STORE, "readonly");
+    var req = tx.objectStore(STORE).getAll();
+    req.onsuccess = function(){ resolve(req.result || []); };
+    req.onerror = function(){ reject(req.error); };
+  });
+}
+function dbPut(db, items){
+  return new Promise(function(resolve, reject){
+    var tx = db.transaction(STORE, "readwrite");
+    items.forEach(function(it){ tx.objectStore(STORE).put(it); });
+    tx.oncomplete = resolve;
+    tx.onerror = function(){ reject(tx.error); };
+  });
+}
+function dbDelete(db, id){
+  return new Promise(function(resolve, reject){
+    var tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = function(){ reject(tx.error); };
+  });
+}
+
+function defaultPhotos(){
+  var imgs = document.querySelectorAll("#defaultPhotos img");
+  var list = [];
+  imgs.forEach(function(im, i){
+    list.push({ id: "default-" + (i + 1), src: im.getAttribute("src"), builtin: true });
+  });
+  return list;
+}
+
+function renderGallery(){
+  var grid = document.getElementById("galleryGrid");
+  var empty = document.getElementById("galleryEmpty");
+  if(!photos.length){
+    grid.innerHTML = "";
+    empty.classList.add("show");
+    return;
+  }
+  empty.classList.remove("show");
+  var html = "";
+  photos.forEach(function(p, i){
+    html += '<div class="photo" data-index="' + i + '" tabindex="0">' +
+      '<button class="del" data-del="' + p.id + '" aria-label="删除这张照片" title="删除">' +
+      '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+      '<img src="' + p.src + '" alt="我们的照片 ' + (i + 1) + '" loading="lazy">' +
+      '<span class="tag">' + (p.builtin ? "宇宙的信" : "我们的回忆") + '</span></div>';
+  });
+  grid.innerHTML = html;
+}
+
+function compressImage(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var maxEdge = 1600;
+        var w = img.width, h = img.height;
+        var scale = Math.min(1, maxEdge / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        var cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(cv.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleFiles(fileList){
+  var files = Array.prototype.slice.call(fileList).filter(function(f){
+    return f.type && f.type.indexOf("image/") === 0;
+  });
+  if(!files.length){ return; }
+  toast("正在把星星放进相册……");
+  var db = await openDB();
+  var items = [];
+  for(var i = 0; i < files.length; i++){
+    try{
+      var data = await compressImage(files[i]);
+      items.push({ id: "user-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 1e4), src: data });
+    }catch(e){}
+  }
+  if(items.length){
+    await dbPut(db, items);
+    photos = await dbGetAll(db);
+    sortPhotos();
+    renderGallery();
+    sfx.play("draw");
+    toast("已收藏 " + items.length + " 颗小星星");
+  }
+}
+function sortPhotos(){
+  // 用户照片在前，默认图在后；各自保持原顺序
+  photos.sort(function(a, b){
+    var au = a.id.indexOf("user-") === 0 ? 0 : 1;
+    var bu = b.id.indexOf("user-") === 0 ? 0 : 1;
+    return au - bu;
+  });
+}
+
+async function initGallery(){
+  var db = await openDB();
+  var list = await dbGetAll(db);
+  if(!list.length){
+    await dbPut(db, defaultPhotos());
+    list = await dbGetAll(db);
+  }
+  photos = list;
+  sortPhotos();
+  renderGallery();
+
+  document.getElementById("uploadBtn").addEventListener("click", function(){
+    document.getElementById("fileInput").click();
+  });
+  document.getElementById("uploadEmptyBtn").addEventListener("click", function(){
+    document.getElementById("fileInput").click();
+  });
+  document.getElementById("fileInput").addEventListener("change", function(e){
+    handleFiles(e.target.files);
+    e.target.value = "";
+  });
+
+  var grid = document.getElementById("galleryGrid");
+  grid.addEventListener("click", function(e){
+    var del = e.target.closest("[data-del]");
+    if(del){
+      e.stopPropagation();
+      var id = del.getAttribute("data-del");
+      removePhoto(id);
+      return;
+    }
+    var card = e.target.closest(".photo");
+    if(card){ openLightbox(parseInt(card.getAttribute("data-index"), 10)); }
+  });
+  grid.addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    var card = e.target.closest(".photo");
+    if(card){ e.preventDefault(); openLightbox(parseInt(card.getAttribute("data-index"), 10)); }
+  });
+}
+
+async function removePhoto(id){
+  var db = await openDB();
+  await dbDelete(db, id);
+  photos = await dbGetAll(db);
+  sortPhotos();
+  renderGallery();
+  toast("已移除这张照片");
+}
+
+/* 灯箱 */
+function openLightbox(i){
+  if(!photos.length){ return; }
+  lbIndex = Math.max(0, Math.min(photos.length - 1, i));
+  updateLightbox();
+  document.getElementById("lightbox").classList.add("show");
+}
+function closeLightbox(){ document.getElementById("lightbox").classList.remove("show"); }
+function stepLightbox(d){
+  if(!photos.length){ return; }
+  lbIndex = (lbIndex + d + photos.length) % photos.length;
+  updateLightbox();
+}
+function updateLightbox(){
+  document.getElementById("lbImg").src = photos[lbIndex].src;
+  document.getElementById("lbCount").textContent = (lbIndex + 1) + " / " + photos.length;
+}
+function bindLightbox(){
+  document.getElementById("lbClose").addEventListener("click", closeLightbox);
+  document.getElementById("lbPrev").addEventListener("click", function(){ stepLightbox(-1); });
+  document.getElementById("lbNext").addEventListener("click", function(){ stepLightbox(1); });
+  document.getElementById("lightbox").addEventListener("click", function(e){
+    if(e.target === this){ closeLightbox(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(!document.getElementById("lightbox").classList.contains("show")) return;
+    if(e.key === "Escape") closeLightbox();
+    if(e.key === "ArrowLeft") stepLightbox(-1);
+    if(e.key === "ArrowRight") stepLightbox(1);
+  });
+  // 触摸滑动
+  var sx = null;
+  var lb = document.getElementById("lightbox");
+  lb.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener("touchend", function(e){
+    if(sx === null) return;
+    var dx = e.changedTouches[0].clientX - sx;
+    if(Math.abs(dx) > 46){ stepLightbox(dx > 0 ? -1 : 1); }
+    sx = null;
+  }, { passive: true });
+}
+
+/* ============================================================
+   7. 合成音效（Web Audio，首次用户手势后启动）
+   ============================================================ */
+var sfx = (function(){
+  var actx = null, enabled = true, master = null;
+  try{ enabled = localStorage.getItem("our-universe-sound") !== "off"; }catch(e){}
+  function ensure(){
+    if(!actx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      actx = new AC();
+      master = actx.createGain();
+      master.gain.value = 0.2;
+      master.connect(actx.destination);
+    }
+    if(actx.state === "suspended"){ actx.resume(); }
+    return actx;
+  }
+  function tone(freq, start, dur, type, vol){
+    var o = actx.createOscillator();
+    var g = actx.createGain();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, start);
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(vol || 0.5, start + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    o.connect(g); g.connect(master);
+    o.start(start); o.stop(start + dur + 0.02);
+  }
+  function play(name){
+    if(!enabled) return;
+    var c = ensure();
+    if(!c) return;
+    var t = c.currentTime;
+    if(name === "heart"){ tone(880, t, 0.16, "sine", 0.5); tone(1318, t + 0.06, 0.18, "sine", 0.35); }
+    else if(name === "gold"){ [784, 988, 1319].forEach(function(f, i){ tone(f, t + i * 0.07, 0.2, "triangle", 0.4); }); }
+    else if(name === "rock"){ tone(196, t, 0.28, "sawtooth", 0.35); tone(130, t + 0.1, 0.3, "sawtooth", 0.3); }
+    else if(name === "start"){ tone(523, t, 0.12, "triangle", 0.4); tone(659, t + 0.1, 0.14, "triangle", 0.4); }
+    else if(name === "draw"){ tone(660, t, 0.14, "sine", 0.4); tone(990, t + 0.08, 0.2, "sine", 0.35); }
+    else if(name === "over"){ [523, 440, 349, 262].forEach(function(f, i){ tone(f, t + i * 0.16, 0.26, "sine", 0.38); }); }
+  }
+  function setEnabled(v){
+    enabled = v;
+    try{ localStorage.setItem("our-universe-sound", v ? "on" : "off"); }catch(e){}
+    if(v){ ensure(); }
+  }
+  return { play: play, ensure: ensure,
+    get enabled(){ return enabled; }, setEnabled: setEnabled };
+})();
+
+function bindSoundToggle(){
+  var btn = document.getElementById("soundBtn");
+  var ON = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7M18 6a8.5 8.5 0 010 12"/></svg>';
+  var OFF = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M16 9l6 6M22 9l-6 6"/></svg>';
+  function render(){
+    btn.innerHTML = enabledIcon();
+    btn.classList.toggle("is-muted", !sfx.enabled);
+  }
+  function enabledIcon(){ return sfx.enabled ? ON : OFF; }
+  render();
+  btn.addEventListener("click", function(){
+    sfx.setEnabled(!sfx.enabled);
+    render();
+    if(sfx.enabled){ sfx.ensure(); sfx.play("draw"); }
+  });
+}
+
+/* ============================================================
+   8. 星海捕心小游戏
+   ============================================================ */
+function initGame(){
+  var canvas = document.getElementById("gameCanvas");
+  var ctx = canvas.getContext("2d");
+  var overlay = document.getElementById("gameOverlay");
+  var scoreEl = document.getElementById("gameScore");
+  var livesEl = document.getElementById("hudLives");
+  var startBtn = document.getElementById("startBtn");
+
+  var W = 0, H = 0, DPR = 1, R = 38;
+  var state = "idle"; // idle | running | over
+  var score = 0, lives = 3, elapsed = 0, spawnTimer = 0;
+  var items = [], particles = [], bgStars = [];
+  var bowlX = 0;
+  var keys = { left: false, right: false };
+  var bowlSprite = null;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if(!bowlX){ bowlX = W / 2; }
+    bowlX = Math.max(R, Math.min(W - R, bowlX));
+    bgStars = [];
+    for(var i = 0; i < Math.round(W / 26); i++){
+      bgStars.push({ x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.3, a: Math.random() * 0.5 + 0.2,
+        tw: Math.random() * 0.8 + 0.3 });
+    }
+    bowlSprite = makeBowlSprite();
+  }
+
+  function makeBowlSprite(){
+    var pad = 22;
+    var cv = document.createElement("canvas");
+    cv.width = (R * 2 + pad * 2) * DPR;
+    cv.height = (R * 2 + pad * 2) * DPR;
+    var c = cv.getContext("2d");
+    c.scale(DPR, DPR);
+    var cx = R + pad, cy = R + pad;
+    // 光晕
+    var glow = c.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.7);
+    glow.addColorStop(0, "rgba(247,211,146,.35)");
+    glow.addColorStop(1, "rgba(247,211,146,0)");
+    c.fillStyle = glow;
+    c.fillRect(0, 0, cv.width / DPR, cv.height / DPR);
+    // 满月
+    var body = c.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.1, cx, cy, R);
+    body.addColorStop(0, "#fff6d9");
+    body.addColorStop(0.7, "#f7d392");
+    body.addColorStop(1, "#e7a85f");
+    c.fillStyle = body;
+    c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.fill();
+    // 擦出开口朝上的月牙
+    c.globalCompositeOperation = "destination-out";
+    c.beginPath();
+    c.arc(cx, cy - R * 0.58, R * 0.94, 0, Math.PI * 2);
+    c.fill();
+    c.globalCompositeOperation = "source-over";
+    return cv;
+  }
+
+  function drawHeart(x, y, s, rot){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot || 0);
+    ctx.scale(s / 16, s / 16);
+    ctx.beginPath();
+    ctx.moveTo(0, 12);
+    ctx.bezierCurveTo(-18, -2, -10, -16, 0, -8);
+    ctx.bezierCurveTo(10, -16, 18, -2, 0, 12);
+    ctx.closePath();
+    ctx.fillStyle = "#f3a3bd";
+    ctx.shadowColor = "rgba(243,163,189,.9)";
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.restore();
+  }
+  function drawSpark(x, y, s, rot){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    ctx.fillStyle = "#f7d392";
+    ctx.shadowColor = "rgba(247,211,146,.95)";
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.moveTo(0, -s);
+    ctx.quadraticCurveTo(2.6, -2.6, s, 0);
+    ctx.quadraticCurveTo(2.6, 2.6, 0, s);
+    ctx.quadraticCurveTo(-2.6, 2.6, -s, 0);
+    ctx.quadraticCurveTo(-2.6, -2.6, 0, -s);
+    ctx.fill();
+    ctx.restore();
+  }
+  function drawRock(x, y, r, rot){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    var g = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+    g.addColorStop(0, "#9a96b6");
+    g.addColorStop(1, "#514d6e");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.9, -r * 0.2);
+    ctx.lineTo(-r * 0.5, -r * 0.85);
+    ctx.lineTo(r * 0.35, -r * 0.95);
+    ctx.lineTo(r * 0.95, -r * 0.25);
+    ctx.lineTo(r * 0.8, r * 0.6);
+    ctx.lineTo(r * 0.1, r * 0.95);
+    ctx.lineTo(-r * 0.7, r * 0.7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(30,26,60,.5)";
+    ctx.beginPath(); ctx.arc(-r * 0.25, -r * 0.1, r * 0.16, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(r * 0.3, r * 0.35, r * 0.12, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function spawn(){
+    var roll = Math.random();
+    var type;
+    if(elapsed < 2){ type = roll < 0.12 ? "gold" : "heart"; }
+    else if(roll < 0.16){ type = "rock"; }
+    else if(roll < 0.28){ type = "gold"; }
+    else { type = "heart"; }
+    items.push({
+      x: 28 + Math.random() * (W - 56),
+      y: -24,
+      vy: 130 + Math.min(190, elapsed * 7.5) + Math.random() * 40,
+      r: type === "rock" ? 15 : 13,
+      type: type,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 2.4,
+      sway: Math.random() * Math.PI * 2
+    });
+  }
+  function burst(x, y, color){
+    for(var i = 0; i < 12; i++){
+      var a = Math.random() * Math.PI * 2;
+      var sp = 40 + Math.random() * 90;
+      particles.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30,
+        life: 0.6 + Math.random() * 0.3, color: color });
+    }
+  }
+
+  function update(dt){
+    elapsed += dt;
+    spawnTimer -= dt;
+    var interval = Math.max(0.45, 1.05 - elapsed * 0.009);
+    if(spawnTimer <= 0){ spawn(); spawnTimer = interval * (0.75 + Math.random() * 0.5); }
+
+    var speed = 380;
+    if(keys.left){ bowlX -= speed * dt; }
+    if(keys.right){ bowlX += speed * dt; }
+    bowlX = Math.max(R, Math.min(W - R, bowlX));
+
+    var bowlY = H - 62;
+    var catchY = bowlY - R * 0.12;
+    var catchHalf = R * 0.78;
+
+    for(var i = items.length - 1; i >= 0; i--){
+      var it = items[i];
+      it.y += it.vy * dt;
+      it.rot += it.vr * dt;
+      it.sway += dt * 2;
+      it.x += Math.sin(it.sway) * 12 * dt;
+      if(it.y >= catchY && it.y <= catchY + 26 && Math.abs(it.x - bowlX) <= catchHalf){
+        if(it.type === "rock"){
+          lives--;
+          sfx.play("rock");
+          burst(it.x, it.y, "#8b87b0");
+          if(lives <= 0){ endGame(); }
+        }else if(it.type === "gold"){
+          score += 5;
+          sfx.play("gold");
+          burst(it.x, it.y, "#f7d392");
+        }else{
+          score += 1;
+          sfx.play("heart");
+          burst(it.x, it.y, "#f3a3bd");
+        }
+        items.splice(i, 1);
+        updateHud();
+        continue;
+      }
+      if(it.y > H + 30){ items.splice(i, 1); }
+    }
+    for(var j = particles.length - 1; j >= 0; j--){
+      var p = particles[j];
+      p.life -= dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 260 * dt;
+      if(p.life <= 0){ particles.splice(j, 1); }
+    }
+  }
+
+  function render(t){
+    ctx.clearRect(0, 0, W, H);
+    // 背景装饰星
+    for(var i = 0; i < bgStars.length; i++){
+      var s = bgStars[i];
+      var a = s.a + Math.sin(t * 0.001 * s.tw) * 0.2;
+      ctx.globalAlpha = Math.max(0.1, Math.min(0.8, a));
+      ctx.fillStyle = "#d8d2ff";
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // 下落物
+    items.forEach(function(it){
+      if(it.type === "heart"){ drawHeart(it.x, it.y, 14, it.rot * 0.3); }
+      else if(it.type === "gold"){ drawSpark(it.x, it.y, 13, it.rot); }
+      else { drawRock(it.x, it.y, it.r, it.rot); }
+    });
+    // 粒子
+    particles.forEach(function(p){
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    // 月亮船（仅游戏进行中显示）
+    if(state === "running"){
+      var bowlY = H - 62;
+      var pad = 22;
+      ctx.drawImage(bowlSprite, bowlX - R - pad, bowlY - R - pad, R * 2 + pad * 2, R * 2 + pad * 2);
+    }
+  }
+
+  var last = 0;
+  function loop(t){
+    var dt = Math.min(0.05, (t - last) / 1000 || 0);
+    last = t;
+    if(state === "running"){ update(dt); }
+    render(t);
+    requestAnimationFrame(loop);
+  }
+
+  function updateHud(){
+    scoreEl.textContent = score;
+    var h = "";
+    for(var i = 0; i < 3; i++){
+      h += '<svg viewBox="0 0 32 32" class="' + (i < lives ? "" : "lost") +
+        '"><path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z"/></svg>';
+    }
+    livesEl.innerHTML = h;
+  }
+
+  function startGame(){
+    state = "running";
+    score = 0; lives = 3; elapsed = 0; spawnTimer = 0.6;
+    items = []; particles = [];
+    bowlX = W / 2;
+    updateHud();
+    overlay.classList.add("hidden");
+    sfx.ensure();
+    sfx.play("start");
+  }
+  function endGame(){
+    state = "over";
+    sfx.play("over");
+    var verdict;
+    if(score < 10) verdict = "没关系，宇宙才刚刚开始膨胀，我们的故事还长着呢。";
+    else if(score < 20) verdict = "你接住了第一片星光，像我第一次接住你的目光。";
+    else if(score < 35) verdict = "星海为你闪烁，我也是。";
+    else if(score < 50) verdict = "你简直是我宇宙级的幸运。";
+    else verdict = "你是从哪个超新星来的？把我的心全接走了。";
+    document.getElementById("ovTitle").textContent = "本轮战绩";
+    document.getElementById("ovDesc").innerHTML =
+      '<span class="final-score">一共接住 <b>' + score + '</b> 颗星</span>';
+    document.querySelector(".legend").style.display = "none";
+    startBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>再玩一次';
+    var vEl = document.getElementById("ovVerdict");
+    if(!vEl){
+      vEl = document.createElement("p");
+      vEl.id = "ovVerdict";
+      vEl.className = "verdict";
+      overlay.insertBefore(vEl, startBtn);
+    }
+    vEl.textContent = verdict;
+    setTimeout(function(){ overlay.classList.remove("hidden"); }, 500);
+  }
+
+  startBtn.addEventListener("click", startGame);
+  canvas.addEventListener("pointermove", function(e){
+    if(state !== "running") return;
+    var rect = canvas.getBoundingClientRect();
+    bowlX = e.clientX - rect.left;
+  }, { passive: true });
+  canvas.addEventListener("pointerdown", function(e){
+    if(state !== "running") return;
+    var rect = canvas.getBoundingClientRect();
+    bowlX = e.clientX - rect.left;
+  }, { passive: true });
+  window.addEventListener("keydown", function(e){
+    if(e.key === "ArrowLeft" || e.key === "a"){ keys.left = true; }
+    if(e.key === "ArrowRight" || e.key === "d"){ keys.right = true; }
+  });
+  window.addEventListener("keyup", function(e){
+    if(e.key === "ArrowLeft" || e.key === "a"){ keys.left = false; }
+    if(e.key === "ArrowRight" || e.key === "d"){ keys.right = false; }
+  });
+  window.addEventListener("resize", resize);
+
+  resize();
+  updateHud();
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   8.5 她的宇宙说明书（可编辑特征墙）
+   ============================================================ */
+var TRAIT_ICONS = {
+  star: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8l-6.1 3.3 1.4-6.8L2.2 9.6l6.9-.8z"/></svg>',
+  heart: '<svg viewBox="0 0 32 32"><path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z"/></svg>',
+  moon: '<svg viewBox="0 0 24 24"><path d="M21 13.2A9 9 0 1110.8 3 7.2 7.2 0 0021 13.2z"/></svg>',
+  sparkle: '<svg viewBox="0 0 24 24"><path d="M12 2l2.1 7.2L21 12l-6.9 2.8L12 22l-2.1-7.2L3 12l6.9-2.8z"/></svg>',
+  comet: '<svg viewBox="0 0 24 24"><path d="M5 15.5L14.5 5l4.5 4.5L9 20l-5 2z"/><circle cx="17" cy="7" r="2.2"/></svg>',
+  planet: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.6"/><ellipse cx="12" cy="12" rx="10.5" ry="3.6" transform="rotate(-20 12 12)" fill="none" stroke="#2b1840" stroke-width="2.2"/></svg>'
+};
+var TRAIT_KEY = "our-universe-traits-v1";
+var traitSeq = 0;
+var traitsStore = { custom: false, items: [] };
+var editingId = null;
+
+function defaultTraits(){
+  var n = cfg.nameB;
+  var data = [
+    ["star", "她的名字", "「" + n + "」三个字，是我读过最短的情诗。"],
+    ["heart", "她的笑容", "她一笑，整个夜空的星星都要重新排队。"],
+    ["moon", "她的温柔", "全宇宙限量发行，而我是唯一的收藏家。"],
+    ["sparkle", "她的眼睛", "里面装着星星、月亮，和我想要的全部未来。"],
+    ["comet", "她的可爱", "违反宇宙守恒定律，因为每天都在增加。"],
+    ["star", "她的声音", "是我所有坏情绪的退散咒语，一喊就灵。"],
+    ["heart", "她的撒娇", "我申请成为唯一指定接收人，终身有效。"],
+    ["planet", "她的存在", "让我相信，宇宙是为了某种浪漫而诞生的。"]
+  ];
+  return data.map(function(d){
+    return { id: ++traitSeq, icon: d[0], title: d[1], text: d[2] };
+  });
+}
+function loadTraits(){
+  try{
+    var raw = localStorage.getItem(TRAIT_KEY);
+    if(raw){
+      var o = JSON.parse(raw);
+      if(o && Array.isArray(o.items)){
+        traitsStore.custom = !!o.custom;
+        traitsStore.items = o.items;
+        o.items.forEach(function(it){ traitSeq = Math.max(traitSeq, it.id || 0); });
+        return;
+      }
+    }
+  }catch(e){}
+  traitsStore.custom = false;
+  traitsStore.items = defaultTraits();
+}
+function saveTraits(){
+  try{ localStorage.setItem(TRAIT_KEY, JSON.stringify(traitsStore)); }catch(e){}
+}
+function renderTraits(){
+  var grid = document.getElementById("traitsGrid");
+  var html = "";
+  traitsStore.items.forEach(function(t){
+    if(editingId === t.id){
+      html += '<div class="trait editing" data-id="' + t.id + '">' +
+        '<input class="t-input" data-field="title" maxlength="14" value="' + escapeHtml(t.title) + '" placeholder="特征标题（比如：她的笑容）">' +
+        '<textarea class="t-textarea" data-field="text" maxlength="120" placeholder="写一句关于她的话">' + escapeHtml(t.text) + '</textarea>' +
+        '<button class="t-save" data-save="' + t.id + '">保存</button></div>';
+    }else{
+      html += '<div class="trait" data-id="' + t.id + '">' +
+        '<div class="t-ops">' +
+          '<button data-edit="' + t.id + '" aria-label="编辑" title="编辑"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13 7l4 4"/></svg></button>' +
+          '<button data-del="' + t.id + '" aria-label="删除" title="删除"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+        '</div>' +
+        '<div class="t-icon">' + TRAIT_ICONS[t.icon] + '</div>' +
+        '<h3>' + escapeHtml(t.title) + '</h3>' +
+        '<p>' + escapeHtml(t.text) + '</p></div>';
+    }
+  });
+  grid.innerHTML = html;
+}
+function initTraits(){
+  var grid = document.getElementById("traitsGrid");
+  var title = document.getElementById("aboutTitle");
+  var n = cfg.nameB;
+  var nn = n.length >= 3 ? n.slice(-2) : n;
+  title.textContent = "关于" + nn + "的观测记录";
+
+  loadTraits();
+  renderTraits();
+
+  grid.addEventListener("click", function(e){
+    var edit = e.target.closest("[data-edit]");
+    var del = e.target.closest("[data-del]");
+    var save = e.target.closest("[data-save]");
+    if(edit){
+      editingId = parseInt(edit.getAttribute("data-edit"), 10);
+      renderTraits();
+      var inp = grid.querySelector('.trait.editing [data-field="title"]');
+      if(inp){ inp.focus(); }
+    }else if(del){
+      var id = parseInt(del.getAttribute("data-del"), 10);
+      traitsStore.items = traitsStore.items.filter(function(t){ return t.id !== id; });
+      traitsStore.custom = true;
+      editingId = null;
+      saveTraits(); renderTraits();
+      sfx.play("heart");
+      toast("已删除，你可以随时恢复出厂情话");
+    }else if(save){
+      var sid = parseInt(save.getAttribute("data-save"), 10);
+      var card = grid.querySelector('.trait.editing');
+      var t = traitsStore.items.filter(function(x){ return x.id === sid; })[0];
+      if(card && t){
+        t.title = card.querySelector('[data-field="title"]').value.trim() || t.title;
+        t.text = card.querySelector('[data-field="text"]').value.trim() || t.text;
+      }
+      traitsStore.custom = true;
+      editingId = null;
+      saveTraits(); renderTraits();
+      sfx.play("draw");
+      toast("已记录，宇宙表示同意");
+    }
+  });
+
+  document.getElementById("addTraitBtn").addEventListener("click", function(){
+    var keys = Object.keys(TRAIT_ICONS);
+    var icon = keys[traitsStore.items.length % keys.length];
+    var t = { id: ++traitSeq, icon: icon, title: "", text: "" };
+    traitsStore.items.push(t);
+    traitsStore.custom = true;
+    editingId = t.id;
+    saveTraits(); renderTraits();
+    var ta = grid.querySelector('.trait.editing [data-field="title"]');
+    if(ta){ ta.focus(); }
+    document.getElementById("about").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  document.getElementById("resetTraitBtn").addEventListener("click", function(){
+    traitsStore.custom = false;
+    traitsStore.items = defaultTraits();
+    editingId = null;
+    saveTraits(); renderTraits();
+    toast("已恢复出厂情话");
+  });
+}
+/* 名字变化后：若用户未自定义过特征，用新名字重建 */
+function refreshTraitsForName(){
+  var grid = document.getElementById("traitsGrid");
+  if(!grid) return;
+  var n = cfg.nameB;
+  document.getElementById("aboutTitle").textContent =
+    "关于" + (n.length >= 3 ? n.slice(-2) : n) + "的观测记录";
+  if(!traitsStore.custom){
+    traitsStore.items = defaultTraits();
+    renderTraits();
+  }
+}
+
+/* ============================================================
+   9. 星语签
+   ============================================================ */
+var FORTUNES = [
+  "你是我宇宙里，唯一的常量。",
+  "星星都在替我，对你说晚安。",
+  "遇见你之后，所有的流星都不用再许愿。",
+  "我绕了整个银河，终于在你这里落了脚。",
+  "宇宙把细碎的温柔，都藏进了你的眼睛里。",
+  "不管光年有多长，我都想和你一起走完。",
+  "你是我所有浪漫公式的唯一解。",
+  "月亮今天也很圆，但我更想你。",
+  "我的宇宙很小，小到只能装下一个你。",
+  "万有引力说，两颗心靠近是宇宙的必然。",
+  "你笑起来的时候，整个夜空都亮了一度。",
+  "写遍每一颗星星，也写不完我想你。",
+  "你在的地方，就是我的轨道中心。",
+  "与你共度的每一天，都是宇宙级的浪漫。",
+  "星际旅行再远，我的终点坐标都是你。",
+  "我把心跳调成了星频，只有你能接收。",
+  "愿你眼里有星河，身边一直有我。",
+  "从尘埃到星辰，我都只想和你一起看。",
+  "宇宙有无数颗原子，而我只想和你的那部分相遇。",
+  "晚安，我的小行星，明天我也绕着你转。",
+  "{name}，遇见你，是我这辈子抽到的上上签。",
+  "报告{name}，我的宇宙已被你全面占领，并且不打算反抗。",
+  "{name}的可爱，已经超出了宇宙的计量单位。",
+  "如果星星有名字，最亮的那颗一定叫{name}。",
+  "{name}，你负责发光就好，我负责绕着你转。",
+  "晚安，{name}。月亮睡了，我还在想你。"
+];
+function fortuneText(i){
+  return FORTUNES[i].replace(/\{name\}/g, escapeHtml(cfg.nameB));
+}
+function initFortune(){
+  var btn = document.getElementById("drawBtn");
+  var text = document.getElementById("fortuneText");
+  var used = [];
+  var busy = false;
+  function draw(){
+    if(busy) return;
+    busy = true;
+    sfx.ensure();
+    sfx.play("draw");
+    text.classList.add("drawing");
+    var pool = FORTUNES.filter(function(_, i){ return used.indexOf(i) === -1; });
+    if(!pool.length){ used = []; pool = FORTUNES.slice(); }
+    var idx = FORTUNES.indexOf(pool[Math.floor(Math.random() * pool.length)]);
+    used.push(idx);
+    var ticks = 0;
+    var timer = setInterval(function(){
+      text.innerHTML = fortuneText(Math.floor(Math.random() * FORTUNES.length));
+      ticks++;
+      if(ticks >= 6){
+        clearInterval(timer);
+        text.classList.remove("drawing");
+        text.innerHTML = fortuneText(idx);
+        busy = false;
+      }
+    }, 70);
+  }
+  btn.addEventListener("click", draw);
+  btn.addEventListener("keydown", function(e){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); draw(); }
+  });
+}
+
+/* ============================================================
+   9.5 宇宙游乐场（6 个互动模块）
+   ============================================================ */
+
+/* ---- 撒花效果（开源 canvas-confetti，加载失败自动降级内置） ---- */
+function celebrate(){
+  if(window.confetti){
+    confetti({ particleCount: 130, spread: 78, startVelocity: 34, origin: { y: .72 },
+      colors: ["#f3a3bd","#f7d392","#b7acf5","#ffffff"] });
+    setTimeout(function(){ confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0, y: .8 } }); }, 260);
+    setTimeout(function(){ confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1, y: .8 } }); }, 520);
+  }else{
+    var colors = ["#f3a3bd","#f7d392","#b7acf5","#ffffff"];
+    for(var i = 0; i < 36; i++){
+      (function(){
+        var d = document.createElement("i");
+        var c = colors[Math.floor(Math.random() * colors.length)];
+        var size = 5 + Math.random() * 7;
+        d.style.cssText = "position:fixed;left:" + (Math.random() * 100) + "vw;top:72vh;width:" + size +
+          "px;height:" + size + "px;background:" + c + ";border-radius:50%;z-index:130;pointer-events:none;" +
+          "opacity:1;box-shadow:0 0 6px " + c + ";";
+        document.body.appendChild(d);
+        var dx = (Math.random() - .5) * 26;
+        var rise = 60 + Math.random() * 90;
+        var life = 1400 + Math.random() * 900;
+        d.animate([
+          { transform: "translate(0,0)", opacity: 1 },
+          { transform: "translate(" + dx + "vw,-" + rise + "vh)", opacity: 0 }
+        ], { duration: life, easing: "cubic-bezier(.22,1,.36,1)" }).onfinish = function(){ d.remove(); };
+      })();
+    }
+  }
+}
+
+/* ---- 游乐场路由 ---- */
+function openPanel(name){
+  document.querySelectorAll(".game-panel").forEach(function(p){ p.classList.remove("open"); });
+  var panel = document.getElementById("panel-" + name);
+  if(panel){ panel.classList.add("open"); }
+  document.getElementById("hall").style.display = "none";
+  var pg = document.getElementById("playground");
+  if(pg){ pg.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  if(name === "quiz"){ startQuiz(); }
+  else if(name === "memory"){ startMemory(); }
+  else if(name === "puzzle"){ startPuzzle(); }
+  else if(name === "ttt"){ resetTtt(); }
+  else if(name === "lovegen"){ genLove(true); }
+  else if(name === "wish"){ renderWishes(); }
+}
+function backToHall(name){
+  var panel = document.getElementById("panel-" + name);
+  if(panel){ panel.classList.remove("open"); }
+  document.getElementById("hall").style.display = "";
+}
+function initPlayground(){
+  document.querySelectorAll(".hall-card").forEach(function(card){
+    card.addEventListener("click", function(){
+      sfx.ensure(); sfx.play("draw");
+      openPanel(card.getAttribute("data-open"));
+    });
+  });
+  document.querySelectorAll(".back").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      sfx.play("rock");
+      backToHall(btn.getAttribute("data-back"));
+    });
+  });
+}
+
+/* ============================================================
+   9.5.1 默契大挑战（可编辑题库）
+   ============================================================ */
+var QUIZ_KEY = "our-universe-quiz-v1";
+var quizStore = null;
+var quizRound = null;
+
+function defaultQuiz(){
+  return [
+    { q: "暴娜娜笑起来的时候，像什么？", opts: ["会发光的恒星", "温柔的月亮", "一颗小星星"], ans: 0 },
+    { q: "暴娜娜生气时，最有效的哄法是？", opts: ["认真认错", "讲冷笑话", "一个紧紧的抱抱"], ans: 2 },
+    { q: "暴娜娜约会时最想做的事是？", opts: ["一起看星空", "去吃好吃的", "一起宅家看剧"], ans: 0 },
+    { q: "暴娜娜点奶茶的时候会选？", opts: ["三分糖", "全糖去冰", "无糖健康局"], ans: 1 },
+    { q: "暴娜娜最怕的东西是？", opts: ["小虫子", "打雷", "无聊"], ans: 0 },
+    { q: "暴娜娜的隐藏技能是？", opts: ["秒睡", "讲段子", "找东西超快"], ans: 0 },
+    { q: "暴娜娜心里你是？", opts: ["最亮的那颗星", "专属月亮", "银河系超级英雄"], ans: 0 },
+    { q: "暴娜娜最常说的口头禅是？", opts: ["随便啦", "你猜～", "好耶！"], ans: 2 },
+    { q: "暴娜娜熬夜的时候在干嘛？", opts: ["偷偷想你", "刷视频", "追剧停不下来"], ans: 0 },
+    { q: "如果暴娜娜是一颗星球，她会？", opts: ["粉色的小星球", "会发光的恒星", "带星环的浪漫星球"], ans: 2 }
+  ];
+}
+function loadQuiz(){
+  try{
+    var raw = localStorage.getItem(QUIZ_KEY);
+    if(raw){ var o = JSON.parse(raw); if(o && Array.isArray(o) && o.length){ quizStore = o; return; } }
+  }catch(e){}
+  quizStore = defaultQuiz();
+}
+function saveQuiz(){ try{ localStorage.setItem(QUIZ_KEY, JSON.stringify(quizStore)); }catch(e){} }
+
+function pickQuizRound(){
+  var pool = quizStore.slice();
+  for(var i = pool.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+  }
+  quizRound = { questions: pool.slice(0, Math.min(5, pool.length)), idx: 0, score: 0, pickA: null, pickB: null };
+}
+function renderQuizQuestion(){
+  var r = quizRound;
+  if(!r || r.idx >= r.questions.length){ return; }
+  var q = r.questions[r.idx];
+  document.getElementById("quizStep").textContent = "第 " + (r.idx + 1) + " / " + r.questions.length + " 题";
+  document.getElementById("quizQ").textContent = q.q;
+  document.getElementById("quizScore").innerHTML = "";
+  var keys = ["A", "B", "C"];
+  document.getElementById("quizOpts").innerHTML = q.opts.map(function(o, i){
+    return '<button class="quiz-opt" data-i="' + i + '"><span class="q-key">' + keys[i] + '</span><span>' + escapeHtml(o) + '</span></button>';
+  }).join("");
+  document.getElementById("quizStatus").innerHTML = "<b>我</b> 先来选，选完交给 <b>" + escapeHtml(cfg.nameB) + "</b>";
+  document.getElementById("quizActions").innerHTML = "";
+}
+function revealQuiz(){
+  var r = quizRound;
+  var q = r.questions[r.idx];
+  var opts = document.querySelectorAll("#quizOpts .quiz-opt");
+  opts.forEach(function(el, i){
+    el.classList.add("resultA", "resultB");
+    if(i === r.pickA){ el.classList.add("pickA"); }
+    if(i === r.pickB){ el.classList.add("pickB"); }
+    if(i === q.ans){ el.classList.add("right"); }
+    el.style.cursor = "default";
+  });
+  var same = r.pickA === r.pickB;
+  if(same){
+    r.score++;
+    sfx.play("heart");
+    document.getElementById("quizStatus").innerHTML = "心有灵犀！两个人都选了同一颗星";
+    celebrate();
+  }else{
+    sfx.play("rock");
+    document.getElementById("quizStatus").innerHTML =
+      "<b>我</b> 选了 " + "ABC"[r.pickA] + "，<b>" + escapeHtml(cfg.nameB) + "</b> 选了 " + "ABC"[r.pickB] +
+      "，正确答案是 <b>" + "ABC"[q.ans] + "</b>";
+  }
+  var rnd = r.idx + 1 >= r.questions.length;
+  document.getElementById("quizActions").innerHTML = rnd
+    ? '<button class="btn solid" id="quizNext">看默契结果</button>'
+    : '<button class="btn solid" id="quizNext">下一题</button>';
+  document.getElementById("quizNext").addEventListener("click", function(){
+    if(rnd){
+      var total = r.questions.length;
+      var pct = Math.round(r.score / total * 100);
+      var msg = pct >= 100 ? "满分默契！你们是宇宙认证的命中注定。" :
+                pct >= 80 ? "超高默契！连宇宙都为你们鼓掌。" :
+                pct >= 60 ? "默契不错，还有一点点惊喜等你发现。" :
+                "默契还在加载中，多玩几次就更懂彼此啦。";
+      document.getElementById("quizStatus").innerHTML = msg;
+      document.getElementById("quizQ").innerHTML = "";
+      document.getElementById("quizOpts").innerHTML = "";
+      document.getElementById("quizScore").innerHTML = "本轮默契度 <b>" + r.score + " / " + total + "</b>（" + pct + "%）";
+      document.getElementById("quizActions").innerHTML =
+        '<button class="btn solid" id="quizAgain">再玩一轮</button>' +
+        '<button class="btn ghost" id="quizEdit">管理题库</button>';
+      document.getElementById("quizAgain").addEventListener("click", function(){
+        quizRound = null;
+        startQuiz();
+      });
+      document.getElementById("quizEdit").addEventListener("click", showQuizEditor);
+      sfx.play("over");
+    }else{
+      r.idx++; r.pickA = null; r.pickB = null;
+      renderQuizQuestion();
+    }
+  });
+}
+function startQuiz(){
+  if(!quizStore){ loadQuiz(); }
+  if(!quizRound){ pickQuizRound(); }
+  document.getElementById("quizStatus").style.display = "";
+  document.getElementById("quizScore").style.display = "";
+  renderQuizQuestion();
+}
+function bindQuizOpts(){
+  document.getElementById("quizOpts").addEventListener("click", function(e){
+    var opt = e.target.closest(".quiz-opt");
+    if(!opt) return;
+    var r = quizRound;
+    if(!r || r.idx >= r.questions.length) return;
+    if(r.pickA !== null && r.pickB !== null) return;
+    var i = parseInt(opt.getAttribute("data-i"), 10);
+    if(r.pickA === null){
+      r.pickA = i;
+      document.querySelectorAll("#quizOpts .quiz-opt").forEach(function(el, x){
+        if(x === i){ el.classList.add("pickA"); }
+      });
+      sfx.play("start");
+      document.getElementById("quizStatus").innerHTML =
+        "好，<b>" + escapeHtml(cfg.nameB) + "</b> 轮到你啦，选你心里的答案";
+    }else{
+      r.pickB = i;
+      document.querySelectorAll("#quizOpts .quiz-opt").forEach(function(el, x){
+        if(x === i){ el.classList.add("pickB"); }
+      });
+      revealQuiz();
+    }
+  });
+}
+
+/* 题库编辑 */
+function showQuizEditor(){
+  var box = document.getElementById("quizOpts");
+  var status = document.getElementById("quizStatus");
+  var step = document.getElementById("quizStep");
+  var actions = document.getElementById("quizActions");
+  step.textContent = "题库管理";
+  status.innerHTML = "点删除按钮移除题目，下方可以添加新题目（最多 30 题）";
+  box.innerHTML = quizStore.map(function(q, i){
+    return '<div style="display:flex;align-items:center;gap:10px;text-align:left;margin-bottom:10px;' +
+      'border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:rgba(9,12,32,.5);">' +
+      '<span style="flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:12px;color:var(--gold);">' + (i + 1) + '</span>' +
+      '<span style="flex:1;font-size:14px;line-height:1.6;color:var(--dim);">' + escapeHtml(q.q) +
+      '<br><span style="font-size:12px;color:var(--faint);">' + escapeHtml(q.opts.join(" / ")) + " · 答案 " + "ABC"[q.ans] + '</span></span>' +
+      '<button data-delq="' + i + '" style="flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-strong);background:rgba(8,10,28,.7);display:grid;place-items:center;"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--rose-soft);fill:none;stroke-width:2;"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>';
+  }).join("") || '<p style="color:var(--faint);">题库空空的，添加第一题吧。</p>';
+  box.innerHTML += '<div style="display:flex;flex-direction:column;gap:9px;margin-top:18px;text-align:left;border-top:1px dashed var(--line);padding-top:18px;">' +
+    '<input id="newQ" placeholder="新问题（例如：暴娜娜最爱吃什么？）" style="width:100%;padding:11px 14px;font-size:14px;font-family:inherit;color:var(--ink);background:rgba(8,11,30,.8);border:1px solid var(--line-strong);border-radius:11px;">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' +
+    '<input id="newO0" placeholder="选项A" style="padding:10px 12px;font-size:13px;font-family:inherit;color:var(--ink);background:rgba(8,11,30,.8);border:1px solid var(--line-strong);border-radius:11px;">' +
+    '<input id="newO1" placeholder="选项B" style="padding:10px 12px;font-size:13px;font-family:inherit;color:var(--ink);background:rgba(8,11,30,.8);border:1px solid var(--line-strong);border-radius:11px;">' +
+    '<input id="newO2" placeholder="选项C" style="padding:10px 12px;font-size:13px;font-family:inherit;color:var(--ink);background:rgba(8,11,30,.8);border:1px solid var(--line-strong);border-radius:11px;">' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">' +
+    '<span style="font-size:13px;color:var(--dim);">正确答案：</span>' +
+    '<select id="newAns" style="padding:9px 12px;font-size:14px;font-family:inherit;color:var(--ink);background:rgba(8,11,30,.9);border:1px solid var(--line-strong);border-radius:11px;">' +
+    '<option value="0">A</option><option value="1">B</option><option value="2">C</option></select>' +
+    '<button class="btn solid" id="newAdd" style="padding:10px 20px;font-size:14px;">添加题目</button>' +
+    '<button class="btn ghost" id="quizBackPlay" style="padding:10px 20px;font-size:14px;">回到游戏</button>' +
+    '</div></div>';
+  box.querySelectorAll("[data-delq]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      quizStore.splice(parseInt(btn.getAttribute("data-delq"), 10), 1);
+      saveQuiz(); showQuizEditor();
+    });
+  });
+  document.getElementById("newAdd").addEventListener("click", function(){
+    var q = document.getElementById("newQ").value.trim();
+    var o0 = document.getElementById("newO0").value.trim();
+    var o1 = document.getElementById("newO1").value.trim();
+    var o2 = document.getElementById("newO2").value.trim();
+    var a = parseInt(document.getElementById("newAns").value, 10);
+    if(!q || !o0 || !o1 || !o2){ toast("问题、三个选项都要填哦"); return; }
+    if(quizStore.length >= 30){ toast("题库最多 30 题"); return; }
+    quizStore.push({ q: q, opts: [o0, o1, o2], ans: a });
+    saveQuiz(); showQuizEditor();
+    toast("已加入题库");
+  });
+  document.getElementById("quizBackPlay").addEventListener("click", function(){
+    quizRound = null;
+    startQuiz();
+  });
+  actions.innerHTML = "";
+}
+
+/* ============================================================
+   9.5.2 心动连连看（记忆翻牌）
+   ============================================================ */
+var MEM_ICONS = [
+  '<svg viewBox="0 0 32 32"><path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z"/></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8l-6.1 3.3 1.4-6.8L2.2 9.6l6.9-.8z"/></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M21 13.2A9 9 0 1110.8 3 7.2 7.2 0 0021 13.2z"/></svg>',
+  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M19.8 4.2L17 7M7 17l-2.8 2.8"/></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M12 21c-4.4-3.5-7-6.4-7-9.5C5 8.6 7.4 6.5 10.2 6.5c1.6 0 3.2.9 4.3 2.4 1-1.5 2.6-2.4 4.2-2.4 2.8 0 5.3 2.1 5.3 5 0 3.1-2.6 6-7 9.5z" transform="translate(-1.7 -1) scale(1.05)"/></svg>',
+  '<svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4.5"/><path d="M13.5 7L23 7 20.5 9.5 23 12l-9.5 0zM7.5 14l4-3v9l-4-3"/></svg>',
+  '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7V5.5A2.5 2.5 0 0110.5 3h3A2.5 2.5 0 0116 5.5V7M3 11h18"/></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M12 3L14 9h6l-5 4 2 6-5-3.5L7 19l2-6-5-4h6z"/></svg>'
+];
+var memCards = [], memOpen = [], memLock = false, memMoves = 0, memPairs = 0, memStart = 0;
+function startMemory(){
+  var deck = [];
+  for(var i = 0; i < 8; i++){ deck.push(i, i); }
+  for(var j = deck.length - 1; j > 0; j--){
+    var k = Math.floor(Math.random() * (j + 1));
+    var t = deck[j]; deck[j] = deck[k]; deck[k] = t;
+  }
+  memCards = deck;
+  memOpen = []; memLock = false; memMoves = 0; memPairs = 0; memStart = Date.now();
+  document.getElementById("memStatus").innerHTML = "翻卡片，找到成双成对的宇宙符号";
+  document.getElementById("memStats").textContent = "步数 0";
+  document.getElementById("memActions").innerHTML = "";
+  var grid = document.getElementById("memGrid");
+  grid.innerHTML = memCards.map(function(id, i){
+    return '<button class="mem-card" data-i="' + i + '" aria-label="翻开卡片">' +
+      '<svg class="back-star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8l-6.1 3.3 1.4-6.8L2.2 9.6l6.9-.8z"/></svg>' +
+      '<span class="face" style="color:' + (id % 2 ? "#f3a3bd" : "#f7d392") + '">' + MEM_ICONS[id] + '</span></button>';
+  }).join("");
+  grid.onclick = function(e){
+    var cell = e.target.closest(".mem-card");
+    if(!cell || memLock) return;
+    var i = parseInt(cell.getAttribute("data-i"), 10);
+    if(memOpen.indexOf(i) !== -1 || cell.classList.contains("matched")) return;
+    cell.classList.add("flipped");
+    memOpen.push(i);
+    sfx.play("heart");
+    if(memOpen.length === 2){
+      memMoves++;
+      document.getElementById("memStats").textContent = "步数 " + memMoves;
+      var a = memOpen[0], b = memOpen[1];
+      if(memCards[a] === memCards[b]){
+        memOpen = [];
+        memPairs++;
+        var cells = document.querySelectorAll(".mem-card");
+        for(var x = 0; x < cells.length; x++){
+          if(x === a || x === b){ cells[x].classList.add("matched"); }
+        }
+        sfx.play("gold");
+        if(memPairs === 8){
+          var secs = Math.round((Date.now() - memStart) / 1000);
+          document.getElementById("memStatus").innerHTML = "全部配对成功！用了 " + memMoves + " 步、" + secs + " 秒，宇宙为你撒花";
+          document.getElementById("memActions").innerHTML = '<button class="btn solid" id="memAgain">再玩一次</button>';
+          document.getElementById("memAgain").addEventListener("click", startMemory);
+          celebrate();
+        }
+      }else{
+        memLock = true;
+        setTimeout(function(){
+          var cells2 = document.querySelectorAll(".mem-card");
+          for(var y = 0; y < cells2.length; y++){
+            if(y === a || y === b){ cells2[y].classList.remove("flipped"); }
+          }
+          memOpen = []; memLock = false;
+        }, 850);
+      }
+    }
+  };
+}
+
+/* ============================================================
+   9.5.3 星空拼图（3×3，保证可解）
+   ============================================================ */
+var puzzleState = [], puzzleBlank = 8, puzzleMoves = 0, puzzleImg = 0;
+var PUZZLE_SRCS = ["assets/p3-heart-nebula.jpg", "assets/p1-starry-hill.jpg", "assets/p6-star-bottle.jpg"];
+function startPuzzle(){
+  var state = [0,1,2,3,4,5,6,7,8];
+  var blank = 8;
+  var last = -1;
+  for(var i = 0; i < 90; i++){
+    var row = Math.floor(blank / 3), col = blank % 3;
+    var moves = [];
+    if(row > 0) moves.push(blank - 3);
+    if(row < 2) moves.push(blank + 3);
+    if(col > 0) moves.push(blank - 1);
+    if(col < 2) moves.push(blank + 1);
+    moves = moves.filter(function(m){ return m !== last; });
+    if(!moves.length){ moves = [blank - 3, blank + 3, blank - 1, blank + 1].filter(function(m){ return m >= 0 && m < 9; }); }
+    var pick = moves[Math.floor(Math.random() * moves.length)];
+    state[blank] = state[pick]; state[pick] = 8;
+    last = blank; blank = pick;
+  }
+  puzzleState = state;
+  puzzleBlank = blank;
+  puzzleMoves = 0;
+  document.getElementById("puzzleMoves").textContent = "0";
+  document.getElementById("puzzleStatus").innerHTML = "点击相邻方块，把星空拼回原样";
+  document.getElementById("puzzleActions").innerHTML = "";
+  renderPuzzle();
+}
+function renderPuzzle(){
+  var board = document.getElementById("puzzleBoard");
+  var src = PUZZLE_SRCS[puzzleImg % PUZZLE_SRCS.length];
+  board.innerHTML = "";
+  for(var i = 0; i < 9; i++){
+    var v = puzzleState[i];
+    var cell = document.createElement("button");
+    cell.className = "puzzle-cell" + (v === 8 ? " blank" : "");
+    cell.setAttribute("data-i", i);
+    cell.setAttribute("aria-label", v === 8 ? "空白格" : "拼图块");
+    if(v !== 8){
+      var img = document.createElement("img");
+      img.src = src;
+      img.alt = "";
+      var row = Math.floor(v / 3), col = v % 3;
+      img.style.objectPosition = (-col * 100) + "% " + (-row * 100) + "%";
+      img.style.transform = "scale(3)";
+      img.style.transformOrigin = (col * 50) + "% " + (row * 50) + "%";
+      cell.appendChild(img);
+    }
+    board.appendChild(cell);
+  }
+  board.onclick = function(e){
+    var cell = e.target.closest(".puzzle-cell");
+    if(!cell) return;
+    var i = parseInt(cell.getAttribute("data-i"), 10);
+    var row = Math.floor(i / 3), col = i % 3;
+    var br = Math.floor(puzzleBlank / 3), bc = puzzleBlank % 3;
+    if(Math.abs(row - br) + Math.abs(col - bc) !== 1){ sfx.play("rock"); return; }
+    puzzleState[puzzleBlank] = puzzleState[i];
+    puzzleState[i] = 8;
+    puzzleBlank = i;
+    puzzleMoves++;
+    document.getElementById("puzzleMoves").textContent = puzzleMoves;
+    sfx.play("heart");
+    renderPuzzle();
+    var done = true;
+    for(var x = 0; x < 9; x++){ if(puzzleState[x] !== x){ done = false; break; } }
+    if(done){
+      document.getElementById("puzzleStatus").innerHTML = "星空拼好啦！用 " + puzzleMoves + " 步，宇宙为你撒花";
+      document.getElementById("puzzleActions").innerHTML =
+        '<button class="btn solid" id="puzzleAgain">再拼一次</button>' +
+        '<button class="btn ghost" id="puzzleSwap">换一张星空</button>';
+      document.getElementById("puzzleAgain").addEventListener("click", startPuzzle);
+      document.getElementById("puzzleSwap").addEventListener("click", function(){
+        puzzleImg++;
+        startPuzzle();
+      });
+      celebrate();
+    }
+  };
+}
+
+/* ============================================================
+   9.5.4 星空井字棋（爱心 vs 星星）
+   ============================================================ */
+var tttBoard = [], tttTurn = 0, tttOver = false;
+function resetTtt(){
+  tttBoard = [null,null,null,null,null,null,null,null,null];
+  tttTurn = 0; tttOver = false;
+  document.getElementById("tttStatus").textContent = "";
+  document.getElementById("tttActions").innerHTML = "";
+  renderTtt();
+}
+function renderTtt(){
+  document.getElementById("tttTurn").innerHTML = tttTurn === 0
+    ? '轮到 <b class="who-heart">爱心队</b> 出击'
+    : '轮到 <b class="who-star">星星队</b> 出击';
+  var board = document.getElementById("tttBoard");
+  board.innerHTML = "";
+  for(var i = 0; i < 9; i++){
+    var v = tttBoard[i];
+    var cell = document.createElement("button");
+    cell.className = "ttt-cell";
+    cell.setAttribute("data-i", i);
+    cell.setAttribute("aria-label", v === 0 ? "爱心" : v === 1 ? "星星" : "空格");
+    if(v === 0){
+      cell.innerHTML = '<svg viewBox="0 0 32 32" class="h-heart"><path d="M16 28C9 22 4 17.5 4 12.2 4 8.4 7 6 10.2 6c2.3 0 4.4 1.3 5.8 3.4C17.4 7.3 19.5 6 21.8 6 25 6 28 8.4 28 12.2 28 17.5 23 22 16 28z"/></svg>';
+    }else if(v === 1){
+      cell.innerHTML = '<svg viewBox="0 0 24 24" class="h-star"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8l-6.1 3.3 1.4-6.8L2.2 9.6l6.9-.8z"/></svg>';
+    }
+    board.appendChild(cell);
+  }
+  board.onclick = function(e){
+    var cell = e.target.closest(".ttt-cell");
+    if(!cell || tttOver) return;
+    var i = parseInt(cell.getAttribute("data-i"), 10);
+    if(tttBoard[i] !== null) return;
+    tttBoard[i] = tttTurn;
+    sfx.play(tttTurn === 0 ? "heart" : "gold");
+    var win = checkTtt(tttBoard);
+    if(win){
+      tttOver = true;
+      var winner = tttBoard[win[0]] === 0 ? "爱心队" : "星星队";
+      document.getElementById("tttStatus").innerHTML = winner + "赢啦！三连成功，今晚由 TA 说晚安";
+      document.getElementById("tttActions").innerHTML = '<button class="btn solid" id="tttAgain">再战一局</button>';
+      document.getElementById("tttAgain").addEventListener("click", resetTtt);
+      celebrate();
+    }else if(tttBoard.every(function(x){ return x !== null; })){
+      tttOver = true;
+      document.getElementById("tttStatus").innerHTML = "平局！棋逢对手，不分胜负，都是我的心头好";
+      document.getElementById("tttActions").innerHTML = '<button class="btn solid" id="tttAgain">再战一局</button>';
+      document.getElementById("tttAgain").addEventListener("click", resetTtt);
+    }else{
+      tttTurn = 1 - tttTurn;
+    }
+    renderTtt();
+  };
+}
+function checkTtt(b){
+  var lines = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for(var i = 0; i < lines.length; i++){
+    var l = lines[i];
+    if(b[l[0]] !== null && b[l[0]] === b[l[1]] && b[l[1]] === b[l[2]]) return l;
+  }
+  return null;
+}
+
+/* ============================================================
+   9.5.5 情话制造机
+   ============================================================ */
+var LOVE_SUBJ = ["我", "我的心", "我的宇宙", "银河", "月亮", "每一颗星星", "我的灵魂"];
+var LOVE_VERB = ["只想", "愿意", "偷偷爱着", "一直在看", "只为你绕", "总在想念", "认真收藏"];
+var LOVE_OBJ = ["你", "你的眼睛", "你的笑容", "暴娜娜", "你的小脾气", "和你的未来", "你的每句晚安"];
+var LOVE_TAIL = ["。", "～", "，永远。", "！"];
+var lastLove = "";
+function genLove(first){
+  var s = LOVE_SUBJ[Math.floor(Math.random() * LOVE_SUBJ.length)];
+  var v = LOVE_VERB[Math.floor(Math.random() * LOVE_VERB.length)];
+  var o = LOVE_OBJ[Math.floor(Math.random() * LOVE_OBJ.length)];
+  var t = LOVE_TAIL[Math.floor(Math.random() * LOVE_TAIL.length)];
+  lastLove = s + v + o + t;
+  var el = document.getElementById("lovegenOut");
+  if(first){ el.innerHTML = lastLove; return; }
+  el.classList.add("rolling");
+  sfx.ensure(); sfx.play("draw");
+  var ticks = 0;
+  var timer = setInterval(function(){
+    el.innerHTML = LOVE_SUBJ[Math.floor(Math.random() * LOVE_SUBJ.length)] +
+      LOVE_VERB[Math.floor(Math.random() * LOVE_VERB.length)] +
+      LOVE_OBJ[Math.floor(Math.random() * LOVE_OBJ.length)] + "…";
+    ticks++;
+    if(ticks >= 5){
+      clearInterval(timer);
+      el.classList.remove("rolling");
+      el.innerHTML = lastLove;
+    }
+  }, 80);
+}
+function initLovegen(){
+  document.getElementById("lovegenBtn").addEventListener("click", function(){ genLove(false); });
+  document.getElementById("lovegenCopy").addEventListener("click", function(){
+    if(!lastLove){ toast("先生成一句情话再复制"); return; }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(lastLove).then(function(){
+        toast("情话已复制，快去发给她");
+      }, function(){ toast("复制失败，长按手动复制"); });
+    }else{
+      var ta = document.createElement("textarea");
+      ta.value = lastLove;
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand("copy"); toast("情话已复制，快去发给她"); }
+      catch(e){ toast("复制失败，长按手动复制"); }
+      ta.remove();
+    }
+  });
+}
+
+/* ============================================================
+   9.5.6 许愿星球（心愿留言板）
+   ============================================================ */
+var WISH_KEY = "our-universe-wishes-v1";
+var wishes = [];
+function loadWishes(){
+  try{
+    var raw = localStorage.getItem(WISH_KEY);
+    if(raw){ var o = JSON.parse(raw); if(Array.isArray(o)){ wishes = o; return; } }
+  }catch(e){}
+  wishes = [];
+}
+function saveWishes(){ try{ localStorage.setItem(WISH_KEY, JSON.stringify(wishes)); }catch(e){} }
+function renderWishes(){
+  loadWishes();
+  var box = document.getElementById("wishList");
+  if(!wishes.length){
+    box.innerHTML = '<p style="color:var(--faint);font-size:14px;padding:26px 0;">还没有心愿，写下第一颗许愿星吧。<br>许下的愿，TA 打开这个宇宙时都能看见。</p>';
+    return;
+  }
+  box.innerHTML = wishes.map(function(w, i){
+    var d = new Date(w.t);
+    var dateStr = (d.getMonth() + 1) + "月" + d.getDate() + "日 " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+    return '<div style="display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:rgba(9,12,32,.5);">' +
+      '<svg viewBox="0 0 24 24" style="width:22px;height:22px;flex:none;fill:var(--gold);filter:drop-shadow(0 0 6px rgba(247,211,146,.6));"><path d="M12 2.5l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8l-6.1 3.3 1.4-6.8L2.2 9.6l6.9-.8z"/></svg>' +
+      '<div style="flex:1;"><p style="font-size:15px;letter-spacing:.03em;">' + escapeHtml(w.text) + '</p>' +
+      '<p style="font-size:12px;color:var(--faint);margin-top:3px;">' + dateStr + ' · 许愿星</p></div>' +
+      '<button data-delw="' + i + '" aria-label="删除" style="flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-strong);background:rgba(8,10,28,.7);display:grid;place-items:center;"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--rose-soft);fill:none;stroke-width:2;"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>';
+  }).join("");
+  box.querySelectorAll("[data-delw]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      wishes.splice(parseInt(btn.getAttribute("data-delw"), 10), 1);
+      saveWishes(); renderWishes();
+      toast("已收回这颗许愿星");
+    });
+  });
+}
+function initWish(){
+  document.getElementById("wishSend").addEventListener("click", function(){
+    var inp = document.getElementById("wishInput");
+    var text = inp.value.trim();
+    if(!text){ toast("先写下心愿再发射"); return; }
+    wishes.unshift({ text: text, t: Date.now() });
+    if(wishes.length > 50){ wishes.pop(); }
+    saveWishes();
+    inp.value = "";
+    renderWishes();
+    sfx.ensure(); sfx.play("gold");
+    celebrate();
+    toast("心愿已发射，TA 打开就能看到");
+  });
+  document.getElementById("wishInput").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ document.getElementById("wishSend").click(); }
+  });
+}
+
+/* ============================================================
+   10. 初始化
+   ============================================================ */
+
+/* ============================================================
+   10. 初始化
+   ============================================================ */
+renderNames();
+renderMilestones();
+tickClock();
+setInterval(tickClock, 1000);
+bindChrome();
+bindSetting();
+bindLightbox();
+bindSoundToggle();
+initTraits();
+initGame();
+initFortune();
+initPlayground();
+bindQuizOpts();
+initLovegen();
+initWish();
+initGallery().catch(function(e){
+  console.error("相册初始化失败", e);
+  document.getElementById("galleryGrid").innerHTML =
+    '<p style="color:#a9a4cf;text-align:center;padding:30px;">相册在这个浏览器里暂时打不开，换个浏览器试试。</p>';
+});
+
+</script>
+</body>
+</html>
